@@ -6,18 +6,18 @@
     <title>انتشار پادکست</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #121212; color: #e0e0e0; margin: 0; padding: 20px; direction: rtl; }
-        .container { max-width: 550px; background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin: auto; border: 1px solid #333; }
+        .container { max-width: 600px; background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin: auto; border: 1px solid #333; }
         h2 { text-align: center; color: #ffffff; margin-top: 0; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #b0b0b0; }
         input[type="text"], input[type="password"], textarea { width: 100%; padding: 10px; margin-top: 5px; background: #2d2d2d; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; }
         input:focus, textarea:focus { border-color: #0d6efd; outline: none; }
         input[type="file"] { width: 100%; padding: 8px; margin-top: 5px; background: #252525; border: 1px solid #444; color: #bbb; border-radius: 6px; cursor: pointer; box-sizing: border-box; }
-        .platforms { background: #252525; padding: 12px; border-radius: 6px; margin-top: 15px; border: 1px solid #383838; }
-        .platforms label { display: inline-block; margin-top: 5px; margin-left: 20px; font-weight: normal; color: #e0e0e0; cursor: pointer; }
-        .platforms input[type="checkbox"] { margin-left: 5px; transform: scale(1.1); cursor: pointer; }
-        button { width: 100%; background: #0d6efd; color: white; border: none; padding: 12px; margin-top: 25px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        .platforms { background: #252525; padding: 15px; border-radius: 6px; margin-top: 10px; border: 1px solid #383838; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .platforms label { margin-top: 0; font-weight: normal; color: #e0e0e0; cursor: pointer; display: flex; align-items: center; }
+        .platforms input[type="checkbox"] { margin-left: 8px; transform: scale(1.2); cursor: pointer; }
+        button { width: 100%; background: #0d6efd; color: white; border: none; padding: 14px; margin-top: 25px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
         button:hover { background: #0b5ed7; }
-        #status { margin-top: 15px; text-align: center; font-weight: bold; }
+        #status { margin-top: 15px; text-align: center; font-weight: bold; line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -25,113 +25,155 @@
 <div class="container">
     <h2>انتشار اپیزود جدید</h2>
     
-    <label>توکن گیت‌هاب (GitHub Token):</label>
+    <label>توکن گیت‌هاب (فقط یک بار وارد کنید):</label>
     <input type="password" id="ghToken" placeholder="ghp_...">
 
     <label>عنوان اپیزود:</label>
-    <input type="text" id="title" placeholder="مثلاً: قسمت اول - معرفی">
+    <input type="text" id="title" placeholder="عنوان اپیزود را وارد کنید">
 
     <label>توضیحات اپیزود:</label>
-    <textarea id="description" rows="3" placeholder="توضیحات کامل درباره این قسمت..."></textarea>
+    <textarea id="description" rows="4" placeholder="توضیحات کامل اپیزود..."></textarea>
 
-    <label>تگ‌ها (جدا شده با فاصله / Space):</label>
-    <input type="text" id="tags" placeholder="پادکست مصاحبه تاکسی etaxi">
+    <label>تگ‌ها (با فاصله / Space از هم جدا کنید):</label>
+    <input type="text" id="tags" placeholder="تگ_اول تگ_دوم تگ_سوم">
 
-    <label>فایل صوتی (MP3):</label>
+    <label>فایل صوتی پادکست (MP3):</label>
     <input type="file" id="audioFile" accept="audio/*">
 
-    <label>عکس کاور افقی (برای یوتیوب):</label>
-    <input type="file" id="imageFile" accept="image/*">
+    <label>عکس افقی ۱۶:۹ (مخصوص یوتیوب - 1920x1080):</label>
+    <input type="file" id="imgHorizontal" accept="image/*">
 
-    <label>عکس کاور عمودی (برای اینستاگرام/ریلز):</label>
-    <input type="file" id="imageVerticalFile" accept="image/*">
+    <label>عکس عمودی ۹:۱۶ (مخصوص اینستاگرام و تیک‌تاک - 1080x1920):</label>
+    <input type="file" id="imgVertical" accept="image/*">
 
-    <label>انتخاب پلتفرم‌های انتشار:</label>
+    <label>عکس مربعی ۱:۱ (مخصوص کاور اسپاتیفای - 1080x1080):</label>
+    <input type="file" id="imgSquare" accept="image/*">
+
+    <label>انتشار در پلتفرم‌های:</label>
     <div class="platforms">
-        <label><input type="checkbox" id="pubYoutube" checked> یوتیوب</label>
-        <label><input type="checkbox" id="pubInstagram" checked> اینستاگرام</label>
+        <label><input type="checkbox" id="platYoutube" checked> یوتیوب (YouTube)</label>
+        <label><input type="checkbox" id="platSpotify" checked> اسپاتیفای (Spotify RSS)</label>
+        <label><input type="checkbox" id="platInstagram" checked> اینستاگرام (Instagram)</label>
+        <label><input type="checkbox" id="platTiktok" checked> تیک‌تاک (TikTok)</label>
     </div>
 
-    <button onclick="publishEpisode()">انتشار و آپلود</button>
+    <button onclick="publishEpisode()">ساخت ویدیو و انتشار</button>
     <div id="status"></div>
 </div>
 
 <script>
     document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
 
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64 = reader.result.split(',')[1];
+                resolve(base64);
+            };
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
+        });
+    }
+
     async function publishEpisode() {
         const token = document.getElementById('ghToken').value.trim();
         const title = document.getElementById('title').value.trim();
         const description = document.getElementById('description').value.trim();
         const tagsInput = document.getElementById('tags').value.trim();
-        const audioInput = document.getElementById('audioFile').files[0];
-        const imageInput = document.getElementById('imageFile').files[0];
-        const imageVerticalInput = document.getElementById('imageVerticalFile').files[0];
         
-        const pubYoutube = document.getElementById('pubYoutube').checked;
-        const pubInstagram = document.getElementById('pubInstagram').checked;
+        const audioFile = document.getElementById('audioFile').files[0];
+        const imgHorizontal = document.getElementById('imgHorizontal').files[0];
+        const imgVertical = document.getElementById('imgVertical').files[0];
+        const imgSquare = document.getElementById('imgSquare').files[0];
+
+        const platYoutube = document.getElementById('platYoutube').checked;
+        const platSpotify = document.getElementById('platSpotify').checked;
+        const platInstagram = document.getElementById('platInstagram').checked;
+        const platTiktok = document.getElementById('platTiktok').checked;
+
         const statusDiv = document.getElementById('status');
 
-        if (!token || !title || !audioInput) {
-            alert('لطفاً توکن، عنوان و فایل صوتی را حداقل وارد کنید.');
+        if (!token || !title || !audioFile) {
+            alert('لطفاً توکن، عنوان و فایل صوتی را وارد کنید.');
+            return;
+        }
+
+        if (platYoutube && !imgHorizontal) {
+            alert('برای انتشار در یوتیوب، لطفاً عکس افقی (۱۶:۹) را انتخاب کنید.');
+            return;
+        }
+
+        if ((platInstagram || platTiktok) && !imgVertical) {
+            alert('برای انتشار در اینستاگرام یا تیک‌تاک، لطفاً عکس عمودی (۹:۱۶) را انتخاب کنید.');
             return;
         }
 
         localStorage.setItem('gh_token', token);
         statusDiv.style.color = '#76d7c4';
-        statusDiv.innerText = 'در حال آپلود فایل‌ها به گیت‌هاب...';
+        statusDiv.innerText = 'در حال ارسال فایل‌ها به سرور ابری گیت‌هاب... لطفاً صبر کنید.';
 
         const owner = 'amirzadehes';
         const repo = 'podcast-publisher';
         const branch = 'main';
 
         try {
-            await uploadFileToGitHub(token, owner, repo, branch, audioInput, 'temp/audio.mp3');
-            
-            if (imageInput) {
-                await uploadFileToGitHub(token, owner, repo, branch, imageInput, 'temp/horizontal.jpg');
+            const audioB64 = await fileToBase64(audioFile);
+            await sendToGitHub(token, owner, repo, branch, audioB64, 'temp/audio.mp3');
+
+            if (imgHorizontal) {
+                const hB64 = await fileToBase64(imgHorizontal);
+                await sendToGitHub(token, owner, repo, branch, hB64, 'temp/horizontal.jpg');
             }
-            if (imageVerticalInput) {
-                await uploadFileToGitHub(token, owner, repo, branch, imageVerticalInput, 'temp/vertical.jpg');
+
+            if (imgVertical) {
+                const vB64 = await fileToBase64(imgVertical);
+                await sendToGitHub(token, owner, repo, branch, vB64, 'temp/vertical.jpg');
             }
-            
-            // جداسازی تگ‌ها با فاصله (Space)
-            const tagsArray = tagsInput ? tagsInput.split(/\s+/) : [];
-            const metaContent = JSON.stringify({ 
-                title, 
-                description, 
+
+            if (imgSquare) {
+                const sB64 = await fileToBase64(imgSquare);
+                await sendToGitHub(token, owner, repo, branch, sB64, 'temp/square.jpg');
+            }
+
+            const tagsArray = tagsInput ? tagsInput.split(/\s+/).filter(Boolean) : [];
+            const metaData = {
+                title: title,
+                description: description,
                 tags: tagsArray,
                 platforms: {
-                    youtube: pubYoutube,
-                    instagram: pubInstagram
-                }
-            });
-            
-            await uploadTextToGitHub(token, owner, repo, branch, metaContent, 'temp/meta.json');
+                    youtube: platYoutube,
+                    spotify: platSpotify,
+                    instagram: platInstagram,
+                    tiktok: platTiktok
+                },
+                timestamp: Date.now()
+            };
+
+            const metaB64 = btoa(unescape(encodeURIComponent(JSON.stringify(metaData, null, 2))));
+            await sendToGitHub(token, owner, repo, branch, metaB64, 'temp/meta.json');
+
+            await triggerWorkflow(token, owner, repo, branch);
 
             statusDiv.style.color = '#2ecc71';
-            statusDiv.innerText = '✅ تمام فایل‌ها ارسال شد! سرور ابری در حال ساخت ویدیو و انتشار است.';
+            statusDiv.innerText = '✅ تمام فایل‌ها ارسال شد! سرور ابری در حال ساخت ویدیوها و انتشار در شبکه‌ها است.';
         } catch (error) {
             statusDiv.style.color = '#e74c3c';
             statusDiv.innerText = '❌ خطا: ' + error.message;
         }
     }
 
-    async function uploadFileToGitHub(token, owner, repo, branch, file, path) {
-        const arrayBuffer = await file.arrayBuffer();
-        const base64Content = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-        return sendToGitHub(token, owner, repo, branch, base64Content, path);
-    }
-
-    async function uploadTextToGitHub(token, owner, repo, branch, text, path) {
-        const base64Content = btoa(unescape(encodeURIComponent(text)));
-        return sendToGitHub(token, owner, repo, branch, base64Content, path);
-    }
-
     async function sendToGitHub(token, owner, repo, branch, base64Content, path) {
         const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
         let sha = null;
-        const getRes = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+        
+        const getRes = await fetch(url, { 
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github+json'
+            } 
+        });
+        
         if (getRes.ok) {
             const data = await getRes.json();
             sha = data.sha;
@@ -148,12 +190,31 @@
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github+json',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(body)
         });
 
-        if (!putRes.ok) throw new Error(`خطا در آپلود ${path}`);
+        if (!putRes.ok) {
+            throw new Error(`خطا در آپلود ${path}`);
+        }
+    }
+
+    async function triggerWorkflow(token, owner, repo, branch) {
+        const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/publish.yml/dispatches`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ref: branch })
+        });
+        if (!res.ok) {
+            throw new Error('فایل‌ها آپلود شدند اما خطایی در راه‌اندازی خودکار سرور رخ داد.');
+        }
     }
 </script>
 </body>
