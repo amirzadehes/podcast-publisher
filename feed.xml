@@ -132,5 +132,16 @@
 			<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_episode/46831955/46831955-1791731044031-1359763a9198b.jpg"/>
 			<itunes:episodeType>full</itunes:episodeType>
 		</item>
-	</channel>
+	
+    <item>
+      <title><![CDATA[تست با زمان بندی]]></title>
+      <description><![CDATA[توضیحات]]></description>
+      <category><![CDATA[دسته بندی تستی]]></category>
+      <enclosure url="https://amirzadehes.github.io/podcast-publisher/episodes/ep_1792013170345.mp3" length="200657" type="audio/mpeg" />
+      <guid isPermaLink="false">ep_1792013170345</guid>
+      <pubDate>Wed, 14 Oct 2026 21:26:48 GMT</pubDate>
+      <itunes:explicit>false</itunes:explicit>
+      <itunes:image href="https://amirzadehes.github.io/podcast-publisher/episodes/cover_1792013170345.jpg" />
+    </item>
+  </channel>
 </rss>
