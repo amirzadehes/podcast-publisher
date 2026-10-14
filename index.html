@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>انتشار پادکست</title>
     <style>
-        body { font-family: Tahoma, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; direction: rtl; }
-        .container { max-width: 500px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: auto; }
-        h2 { text-align: center; color: #333; }
-        label { display: block; margin-top: 15px; font-weight: bold; color: #555; }
-        input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; background: #007bff; color: white; border: none; padding: 12px; margin-top: 20px; font-size: 16px; border-radius: 6px; cursor: pointer; }
-        button:hover { background: #0056b3; }
+        body { font-family: Tahoma, sans-serif; background: #121212; color: #e0e0e0; margin: 0; padding: 20px; direction: rtl; }
+        .container { max-width: 500px; background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin: auto; border: 1px solid #333; }
+        h2 { text-align: center; color: #ffffff; margin-top: 0; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #b0b0b0; }
+        input, textarea { width: 100%; padding: 10px; margin-top: 5px; background: #2d2d2d; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; }
+        input:focus, textarea:focus { border-color: #0d6efd; outline: none; }
+        input[type="file"] { padding: 8px; background: #252525; cursor: pointer; }
+        button { width: 100%; background: #0d6efd; color: white; border: none; padding: 12px; margin-top: 25px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        button:hover { background: #0b5ed7; }
         #status { margin-top: 15px; text-align: center; font-weight: bold; }
     </style>
 </head>
@@ -29,8 +31,8 @@
     <label>توضیحات اپیزود:</label>
     <textarea id="description" rows="3" placeholder="توضیحات کامل درباره این قسمت..."></textarea>
 
-    <label>تگ‌ها (با کاما , جدا کنید):</label>
-    <input type="text" id="tags" placeholder="پادکست, مصاحبه, تاکسی, etaxi">
+    <label>تگ‌ها (جدا شده با فاصله / Space):</label>
+    <input type="text" id="tags" placeholder="پادکست مصاحبه تاکسی etaxi">
 
     <label>فایل صوتی (MP3):</label>
     <input type="file" id="audioFile" accept="audio/*">
@@ -43,7 +45,6 @@
 </div>
 
 <script>
-    // ذخیره خودکار توکن در حافظه مرورگر
     document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
 
     async function publishEpisode() {
@@ -61,7 +62,7 @@
         }
 
         localStorage.setItem('gh_token', token);
-        statusDiv.style.color = 'blue';
+        statusDiv.style.color = '#76d7c4';
         statusDiv.innerText = 'در حال آپلود فایل‌ها به گیت‌هاب...';
 
         const owner = 'amirzadehes';
@@ -69,18 +70,18 @@
         const branch = 'main';
 
         try {
-            // ۱. آپلود فایل صوتی
             await uploadFileToGitHub(token, owner, repo, branch, audioInput, 'temp/audio.mp3');
-            // ۲. آپلود عکس
             await uploadFileToGitHub(token, owner, repo, branch, imageInput, 'temp/horizontal.jpg');
-            // ۳. آپلود فایل متنی حاوی مشخصات (عنوان، توضیحات و تگ‌ها)
-            const metaContent = JSON.stringify({ title, description, tags: tagsInput.split(',').map(t => t.trim()) });
+            
+            // جداسازی تگ‌ها با فاصله (Space) به جای کاما
+            const tagsArray = tagsInput ? tagsInput.split(/\s+/) : [];
+            const metaContent = JSON.stringify({ title, description, tags: tagsArray });
             await uploadTextToGitHub(token, owner, repo, branch, metaContent, 'temp/meta.json');
 
-            statusDiv.style.color = 'green';
+            statusDiv.style.color = '#2ecc71';
             statusDiv.innerText = '✅ تمام فایل‌ها ارسال شد! سرور ابری در حال ساخت ویدیو و انتشار است.';
         } catch (error) {
-            statusDiv.style.color = 'red';
+            statusDiv.style.color = '#e74c3c';
             statusDiv.innerText = '❌ خطا: ' + error.message;
         }
     }
