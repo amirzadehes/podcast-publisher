@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Podcast Publisher</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; }
+    .card { max-width: 500px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+    h2 { margin-top: 0; text-align: center; color: #38bdf8; }
+    label { display: block; margin-top: 14px; margin-bottom: 6px; font-size: 14px; color: #cbd5e1; font-weight: 600; }
+    input[type="text"], input[type="password"], textarea, input[type="file"] {
+      width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 14px;
+    }
+    textarea { height: 100px; resize: vertical; }
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; background: #0f172a; padding: 12px; border-radius: 10px; }
+    .checks label { margin: 0; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    button {
+      width: 100%; margin-top: 20px; padding: 14px; background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #status { margin-top: 16px; text-align: center; font-size: 14px; color: #38bdf8; white-space: pre-line; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>انتشار خودکار پادکست</h2>
+    <label>توکن گیت‌هاب (فقط یک بار وارد کنید)</label>
+    <input type="password" id="token" placeholder="ghp_...">
+
+    <label>عنوان اپیزود</label>
+    <input type="text" id="title" placeholder="عنوان اپیزود را وارد کنید">
+
+    <label>توضیحات و کپشن</label>
+    <textarea id="desc" placeholder="متن توضیحات یوتیوب، اسپاتیفای و کپشن اینستاگرام و تیک‌تاک"></textarea>
+
+    <label>فایل صوتی (MP3)</label>
+    <input type="file" id="audio" accept="audio/*">
+
+    <label>عکس عمودی (اینستاگرام و تیک‌تاک - 9:16)</label>
+    <input type="file" id="vertical" accept="image/*">
+
+    <label>عکس افقی (یوتیوب - 16:9)</label>
+    <input type="file" id="horizontal" accept="image/*">
+
+    <label>عکس مربعی (اسپاتیفای - 1:1)</label>
+    <input type="file" id="square" accept="image/*">
+
+    <div class="checks">
+      <label><input type="checkbox" id="sp" checked> Spotify</label>
+      <label><input type="checkbox" id="yt" checked> YouTube</label>
+      <label><input type="checkbox" id="ig" checked> Instagram</label>
+      <label><input type="checkbox" id="tt" checked> TikTok</label>
+    </div>
+
+    <button id="btn" onclick="publish()">ساخت ویدیو و انتشار</button>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    const OWNER = "amirzadehes";
+    const REPO = "podcast-publisher";
+    const BRANCH = "main";
+
+    document.getElementById('token').value = localStorage.getItem('gh_token') || '';
+
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadFile(token, path, base64Content) {
+      const url = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/' + path;
+      let sha = null;
+      const getRes = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+      if (getRes.ok) {
+        const data = await getRes.json();
+        sha = data.sha;
+      }
+      const body = { message: 'Upload ' + path, content: base64Content, branch: BRANCH };
+      if (sha) body.sha = sha;
+      const putRes = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!putRes.ok) throw new Error('خطا در آپلود ' + path);
+    }
+
+    async function publish() {
+      const token = document.getElementById('token').value.trim();
+      const title = document.getElementById('title').value.trim();
+      const desc = document.getElementById('desc').value.trim();
+      const audio = document.getElementById('audio').files[0];
+      const vertical = document.getElementById('vertical').files[0];
+      const horizontal = document.getElementById('horizontal').files[0];
+      const square = document.getElementById('square').files[0];
+      const status = document.getElementById('status');
+      const btn = document.getElementById('btn');
+
+      if (!token || !title || !audio) {
+        status.innerText = 'لطفاً توکن، عنوان و فایل صوتی را وارد کنید.';
+        return;
+      }
+
+      localStorage.setItem('gh_token', token);
+      btn.disabled = true;
+
+      try {
+        status.innerText = '۱/۵ در حال آپلود فایل صوتی به فضای ابری...';
+        await uploadFile(token, 'temp/audio.mp3', await toBase64(audio));
+
+        if (vertical) {
+          status.innerText = '۲/۵ در حال آپلود عکس عمودی...';
+          await uploadFile(token, 'temp/vertical.jpg', await toBase64(vertical));
+        }
+        if (horizontal) {
+          status.innerText = '۳/۵ در حال آپلود عکس افقی...';
+          await uploadFile(token, 'temp/horizontal.jpg', await toBase64(horizontal));
+        }
+        if (square) {
+          status.innerText = '۴/۵ در حال آپلود عکس مربعی...';
+          await uploadFile(token, 'temp/square.jpg', await toBase64(square));
+        }
+
+        const meta = {
+          title: title,
+          description: desc,
+          platforms: {
+            spotify: document.getElementById('sp').checked,
+            youtube: document.getElementById('yt').checked,
+            instagram: document.getElementById('ig').checked,
+            tiktok: document.getElementById('tt').checked
+          }
+        };
+        const metaBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(meta, null, 2))));
+        await uploadFile(token, 'temp/meta.json', metaBase64);
+
+        status.innerText = '۵/۵ در حال روشن کردن موتور ساخت ویدیو و انتشار...';
+        await fetch('https://api.github.com/repos/' + OWNER + '/' + REPO + '/actions/workflows/publish.yml/dispatches', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ref: BRANCH })
+        });
+
+        status.innerText = '✅ تمام فایل‌ها ارسال شد! سرور ابری در حال ساخت ویدیوها و انتشار در شبکه‌ها است.';
+      } catch (e) {
+        status.innerText = '❌ خطا: ' + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
