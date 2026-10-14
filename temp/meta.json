@@ -6,18 +6,18 @@
     "توشسشسز"
   ],
   "categoryName": "دسته بندی تستی",
-  "publishAt": "2026-10-14T21:10:00.000Z",
+  "publishAt": null,
   "platforms": {
-    "youtube": true,
-    "spotify": false,
+    "youtube": false,
+    "spotify": true,
     "instagram": false,
     "tiktok": false
   },
   "done": {
-    "youtube": true,
+    "youtube": false,
     "spotify": false,
     "instagram": false,
     "tiktok": false
   },
-  "timestamp": 1792011969292
+  "timestamp": 1792012713128
 }
