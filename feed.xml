@@ -1,8 +1,29 @@
-- name: Update Feed and Clean Temp
-        run: |
-          git config user.name "PodcastBot"
-          git config user.email "bot@users.noreply.github.com"
-          git rm -rf temp || true
-          git add feed.xml episodes/ || true
-          git commit -m "Publish new episode" || true
-          git push
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>ذره‌بین</title>
+    <link>https://amirzadehes.github.io/podcast-publisher/</link>
+    <description>پادکست ذره‌بین</description>
+    <language>fa</language>
+    <itunes:author>Amir Ahmad Hosseinzadeh</itunes:author>
+    <itunes:owner>
+      <itunes:name>ذره‌بین</itunes:name>
+      <itunes:email>zadeh.amah@gmail.com</itunes:email>
+    </itunes:owner>
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:type>episodic</itunes:type>
+    <itunes:category text="Society &amp; Culture"/>
+    <itunes:image href="https://amirzadehes.github.io/podcast-publisher/episodes/cover_1792012713128.jpg"/>
+  
+    <item>
+      <title><![CDATA[تست با زمان بندی]]></title>
+      <description><![CDATA[توضیحات]]></description>
+      <category><![CDATA[دسته بندی تستی]]></category>
+      <enclosure url="https://amirzadehes.github.io/podcast-publisher/episodes/ep_1792012713128.mp3" length="200657" type="audio/mpeg" />
+      <guid isPermaLink="false">ep_1792012713128</guid>
+      <pubDate>Wed, 14 Oct 2026 21:19:26 GMT</pubDate>
+      <itunes:explicit>false</itunes:explicit>
+      <itunes:image href="https://amirzadehes.github.io/podcast-publisher/episodes/cover_1792012713128.jpg" />
+    </item>
+  </channel>
+</rss>
