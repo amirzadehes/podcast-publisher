@@ -1,6 +1,8 @@
 name: Publish Podcast
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'
 permissions:
   contents: write
 jobs:
@@ -8,11 +10,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check Temp Folder
+        id: check_temp
+        run: |
+          if [ -f "temp/meta.json" ]; then
+            echo "has_job=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_job=false" >> $GITHUB_OUTPUT
+          fi
       - name: Install Dependencies and FFmpeg
+        if: steps.check_temp.outputs.has_job == 'true'
         run: |
           sudo apt-get update && sudo apt-get install -y ffmpeg
           npm install googleapis
       - name: Process and Publish
+        if: steps.check_temp.outputs.has_job == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
@@ -22,10 +34,15 @@ jobs:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
         run: node publish.js
       - name: Update Feed and Clean Temp
+        if: steps.check_temp.outputs.has_job == 'true'
         run: |
           git config user.name "PodcastBot"
           git config user.email "bot@users.noreply.github.com"
-          git rm -rf temp || true
+          if [ -f "temp/completed.flag" ]; then
+            git rm -rf temp || true
+          else
+            git add temp/meta.json || true
+          fi
           git add feed.xml episodes/ || true
-          git commit -m "Publish new episode" || true
+          git commit -m "Update podcast publish state" || true
           git push
