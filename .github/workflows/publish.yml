@@ -43,6 +43,6 @@ jobs:
           else
             git add temp/meta.json || true
           fi
-          git add feed.xml episodes/ || true
+          git add feed.xml cover.jpg episodes/ || true
           git commit -m "Update podcast publish state" || true
           git push
