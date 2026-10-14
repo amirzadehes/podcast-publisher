@@ -6,12 +6,15 @@
     <title>انتشار پادکست</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #121212; color: #e0e0e0; margin: 0; padding: 20px; direction: rtl; }
-        .container { max-width: 500px; background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin: auto; border: 1px solid #333; }
+        .container { max-width: 550px; background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin: auto; border: 1px solid #333; }
         h2 { text-align: center; color: #ffffff; margin-top: 0; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #b0b0b0; }
-        input, textarea { width: 100%; padding: 10px; margin-top: 5px; background: #2d2d2d; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; }
+        input[type="text"], input[type="password"], textarea { width: 100%; padding: 10px; margin-top: 5px; background: #2d2d2d; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; }
         input:focus, textarea:focus { border-color: #0d6efd; outline: none; }
-        input[type="file"] { padding: 8px; background: #252525; cursor: pointer; }
+        input[type="file"] { width: 100%; padding: 8px; margin-top: 5px; background: #252525; border: 1px solid #444; color: #bbb; border-radius: 6px; cursor: pointer; box-sizing: border-box; }
+        .platforms { background: #252525; padding: 12px; border-radius: 6px; margin-top: 15px; border: 1px solid #383838; }
+        .platforms label { display: inline-block; margin-top: 5px; margin-left: 20px; font-weight: normal; color: #e0e0e0; cursor: pointer; }
+        .platforms input[type="checkbox"] { margin-left: 5px; transform: scale(1.1); cursor: pointer; }
         button { width: 100%; background: #0d6efd; color: white; border: none; padding: 12px; margin-top: 25px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
         button:hover { background: #0b5ed7; }
         #status { margin-top: 15px; text-align: center; font-weight: bold; }
@@ -37,8 +40,17 @@
     <label>فایل صوتی (MP3):</label>
     <input type="file" id="audioFile" accept="audio/*">
 
-    <label>عکس کاور (Jpg / Png):</label>
+    <label>عکس کاور افقی (برای یوتیوب):</label>
     <input type="file" id="imageFile" accept="image/*">
+
+    <label>عکس کاور عمودی (برای اینستاگرام/ریلز):</label>
+    <input type="file" id="imageVerticalFile" accept="image/*">
+
+    <label>انتخاب پلتفرم‌های انتشار:</label>
+    <div class="platforms">
+        <label><input type="checkbox" id="pubYoutube" checked> یوتیوب</label>
+        <label><input type="checkbox" id="pubInstagram" checked> اینستاگرام</label>
+    </div>
 
     <button onclick="publishEpisode()">انتشار و آپلود</button>
     <div id="status"></div>
@@ -54,10 +66,14 @@
         const tagsInput = document.getElementById('tags').value.trim();
         const audioInput = document.getElementById('audioFile').files[0];
         const imageInput = document.getElementById('imageFile').files[0];
+        const imageVerticalInput = document.getElementById('imageVerticalFile').files[0];
+        
+        const pubYoutube = document.getElementById('pubYoutube').checked;
+        const pubInstagram = document.getElementById('pubInstagram').checked;
         const statusDiv = document.getElementById('status');
 
-        if (!token || !title || !audioInput || !imageInput) {
-            alert('لطفاً توکن، عنوان، فایل صوتی و عکس را وارد کنید.');
+        if (!token || !title || !audioInput) {
+            alert('لطفاً توکن، عنوان و فایل صوتی را حداقل وارد کنید.');
             return;
         }
 
@@ -71,11 +87,26 @@
 
         try {
             await uploadFileToGitHub(token, owner, repo, branch, audioInput, 'temp/audio.mp3');
-            await uploadFileToGitHub(token, owner, repo, branch, imageInput, 'temp/horizontal.jpg');
             
-            // جداسازی تگ‌ها با فاصله (Space) به جای کاما
+            if (imageInput) {
+                await uploadFileToGitHub(token, owner, repo, branch, imageInput, 'temp/horizontal.jpg');
+            }
+            if (imageVerticalInput) {
+                await uploadFileToGitHub(token, owner, repo, branch, imageVerticalInput, 'temp/vertical.jpg');
+            }
+            
+            // جداسازی تگ‌ها با فاصله (Space)
             const tagsArray = tagsInput ? tagsInput.split(/\s+/) : [];
-            const metaContent = JSON.stringify({ title, description, tags: tagsArray });
+            const metaContent = JSON.stringify({ 
+                title, 
+                description, 
+                tags: tagsArray,
+                platforms: {
+                    youtube: pubYoutube,
+                    instagram: pubInstagram
+                }
+            });
+            
             await uploadTextToGitHub(token, owner, repo, branch, metaContent, 'temp/meta.json');
 
             statusDiv.style.color = '#2ecc71';
