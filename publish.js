@@ -108,7 +108,7 @@ async function run() {
         const pubDate = publishAt ? new Date(publishAt).toUTCString() : new Date().toUTCString();
 
         let feed = '';
-        if (fs.existsSync('feed.xml') && fs.readFileSync('feed.xml', 'utf8').includes('zadeh.amah@gmail.com')) {
+        if (fs.existsSync('feed.xml') && fs.readFileSync('feed.xml', 'utf8').includes('<channel>')) {
             feed = fs.readFileSync('feed.xml', 'utf8');
         } else {
             feed = `<?xml version="1.0" encoding="UTF-8"?>
@@ -133,8 +133,7 @@ async function run() {
 
         const categoryTag = categoryName ? `\n      <category><![CDATA[${categoryName}]]></category>` : '';
 
-        const newItem = `
-    <item>
+        const newItem = `    <item>
       <title><![CDATA[${title}]]></title>
       <description><![CDATA[${description}]]></description>${categoryTag}
       <enclosure url="${audioUrl}" length="${fileSize}" type="audio/mpeg" />
@@ -144,7 +143,12 @@ async function run() {
       <itunes:image href="${coverUrl}" />
     </item>`;
 
-        feed = feed.replace('</channel>', `${newItem}\n  </channel>`);
+        if (feed.includes('<item>')) {
+            feed = feed.replace('<item>', `${newItem}\n    <item>`);
+        } else {
+            feed = feed.replace('</channel>', `${newItem}\n  </channel>`);
+        }
+
         fs.writeFileSync('feed.xml', feed);
         console.log("Spotify RSS feed updated.");
         done.spotify = true;
