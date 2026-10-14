@@ -2,6 +2,8 @@ const fs = require('fs');
 const { google } = require('googleapis');
 const { execSync } = require('child_process');
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function run() {
     if (!fs.existsSync('temp/meta.json')) {
         console.log("No meta.json found in temp folder.");
@@ -151,10 +153,13 @@ async function handleYouTubePlaylist(youtube, videoId, playlistTitle) {
                 pageToken: nextPageToken
             });
 
-            const found = plRes.data.items.find(item => item.snippet.title.toLowerCase() === playlistTitle.toLowerCase());
-            if (found) {
-                playlistId = found.id;
-                break;
+            if (plRes.data.items) {
+                const found = plRes.data.items.find(item => item.snippet.title.trim().toLowerCase() === playlistTitle.trim().toLowerCase());
+                if (found) {
+                    playlistId = found.id;
+                    console.log(`Found existing playlist "${playlistTitle}" with ID: ${playlistId}`);
+                    break;
+                }
             }
             nextPageToken = plRes.data.nextPageToken;
         } while (nextPageToken);
@@ -165,7 +170,8 @@ async function handleYouTubePlaylist(youtube, videoId, playlistTitle) {
                 part: 'snippet,status',
                 requestBody: {
                     snippet: {
-                        title: playlistTitle
+                        title: playlistTitle,
+                        description: `پلی‌لیست ${playlistTitle}`
                     },
                     status: {
                         privacyStatus: 'public'
@@ -173,21 +179,36 @@ async function handleYouTubePlaylist(youtube, videoId, playlistTitle) {
                 }
             });
             playlistId = createRes.data.id;
+            console.log(`Created new playlist with ID: ${playlistId}. Waiting 5 seconds for YouTube indexing...`);
+            await sleep(5000);
+        } else {
+            await sleep(2000);
         }
 
-        await youtube.playlistItems.insert({
-            part: 'snippet',
-            requestBody: {
-                snippet: {
-                    playlistId: playlistId,
-                    resourceId: {
-                        kind: 'youtube#video',
-                        videoId: videoId
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+                await youtube.playlistItems.insert({
+                    part: 'snippet',
+                    requestBody: {
+                        snippet: {
+                            playlistId: playlistId,
+                            resourceId: {
+                                kind: 'youtube#video',
+                                videoId: videoId
+                            }
+                        }
                     }
+                });
+                console.log(`Successfully added video ${videoId} to playlist "${playlistTitle}".`);
+                break;
+            } catch (insertErr) {
+                console.error(`Attempt ${attempt} to add video to playlist failed: ${insertErr.message}`);
+                if (attempt < 3) {
+                    console.log("Retrying in 4 seconds...");
+                    await sleep(4000);
                 }
             }
-        });
-        console.log(`Added video to playlist "${playlistTitle}".`);
+        }
     } catch (err) {
         console.error("Error managing YouTube playlist:", err.message);
     }
