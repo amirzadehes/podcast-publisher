@@ -1,0 +1,10 @@
+{
+  "title": "تست دوم",
+  "description": "عادی سازی اینجا هست",
+  "platforms": {
+    "spotify": false,
+    "youtube": true,
+    "instagram": false,
+    "tiktok": false
+  }
+}
