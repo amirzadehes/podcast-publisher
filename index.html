@@ -9,7 +9,7 @@
         .container { max-width: 600px; background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin: auto; border: 1px solid #333; }
         h2 { text-align: center; color: #ffffff; margin-top: 0; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #b0b0b0; }
-        input[type="text"], input[type="password"], textarea { width: 100%; padding: 10px; margin-top: 5px; background: #2d2d2d; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; }
+        input[type="text"], input[type="password"], input[type="datetime-local"], textarea { width: 100%; padding: 10px; margin-top: 5px; background: #2d2d2d; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; }
         input:focus, textarea:focus { border-color: #0d6efd; outline: none; }
         input[type="file"] { width: 100%; padding: 8px; margin-top: 5px; background: #252525; border: 1px solid #444; color: #bbb; border-radius: 6px; cursor: pointer; box-sizing: border-box; }
         .platforms { background: #252525; padding: 15px; border-radius: 6px; margin-top: 10px; border: 1px solid #383838; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -36,6 +36,12 @@
 
     <label>تگ‌ها (با فاصله / Space از هم جدا کنید):</label>
     <input type="text" id="tags" placeholder="تگ_اول تگ_دوم تگ_سوم">
+
+    <label>دسته‌بندی / پلی‌لیست (در صورت نبودن، خودکار ساخته می‌شود):</label>
+    <input type="text" id="categoryName" placeholder="مثلاً: Studio 15 یا Katalog">
+
+    <label>زمان انتشار (اختیاری - برای انتشار فوری خالی بگذارید):</label>
+    <input type="datetime-local" id="publishAt">
 
     <label>فایل صوتی پادکست (MP3):</label>
     <input type="file" id="audioFile" accept="audio/*">
@@ -81,6 +87,8 @@
         const title = document.getElementById('title').value.trim();
         const description = document.getElementById('description').value.trim();
         const tagsInput = document.getElementById('tags').value.trim();
+        const categoryName = document.getElementById('categoryName').value.trim();
+        const publishAtInput = document.getElementById('publishAt').value;
         
         const audioFile = document.getElementById('audioFile').files[0];
         const imgHorizontal = document.getElementById('imgHorizontal').files[0];
@@ -107,6 +115,16 @@
         if ((platInstagram || platTiktok) && !imgVertical) {
             alert('برای انتشار در اینستاگرام یا تیک‌تاک، لطفاً عکس عمودی (۹:۱۶) را انتخاب کنید.');
             return;
+        }
+
+        let publishAtISO = null;
+        if (publishAtInput) {
+            const selectedDate = new Date(publishAtInput);
+            if (selectedDate <= new Date()) {
+                alert('زمان انتخاب شده برای انتشار باید در آینده باشد.');
+                return;
+            }
+            publishAtISO = selectedDate.toISOString();
         }
 
         localStorage.setItem('gh_token', token);
@@ -141,11 +159,19 @@
                 title: title,
                 description: description,
                 tags: tagsArray,
+                categoryName: categoryName,
+                publishAt: publishAtISO,
                 platforms: {
                     youtube: platYoutube,
                     spotify: platSpotify,
                     instagram: platInstagram,
                     tiktok: platTiktok
+                },
+                done: {
+                    youtube: false,
+                    spotify: false,
+                    instagram: false,
+                    tiktok: false
                 },
                 timestamp: Date.now()
             };
@@ -156,7 +182,7 @@
             await triggerWorkflow(token, owner, repo, branch);
 
             statusDiv.style.color = '#2ecc71';
-            statusDiv.innerText = '✅ تمام فایل‌ها ارسال شد! سرور ابری در حال ساخت ویدیوها و انتشار در شبکه‌ها است.';
+            statusDiv.innerText = '✅ تمام فایل‌ها ارسال شد! سرور ابری بر اساس تنظیمات و زمان‌بندی شما عمل خواهد کرد.';
         } catch (error) {
             statusDiv.style.color = '#e74c3c';
             statusDiv.innerText = '❌ خطا: ' + error.message;
