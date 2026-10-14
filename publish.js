@@ -87,34 +87,46 @@ async function run() {
     }
 
     if (platforms.spotify && !done.spotify && fs.existsSync('temp/audio.mp3')) {
-        console.log("Updating Spotify RSS feed...");
+        console.log("Updating Spotify RSS feed for ذره‌بین...");
         if (!fs.existsSync('episodes')) {
             fs.mkdirSync('episodes');
         }
         const audioPath = `episodes/ep_${epId}.mp3`;
         fs.copyFileSync('temp/audio.mp3', audioPath);
+        const fileSize = fs.statSync(audioPath).size;
 
         let coverUrl = "https://amirzadehes.github.io/podcast-publisher/cover.jpg";
         if (fs.existsSync('temp/square.jpg')) {
             const coverPath = `episodes/cover_${epId}.jpg`;
-            fs.copyFileSync('temp/square.jpg', coverPath);
+            const scaleCoverCmd = `ffmpeg -y -i temp/square.jpg -vf "scale=1400:1400:force_original_aspect_ratio=increase,crop=1400:1400" ${coverPath}`;
+            execSync(scaleCoverCmd, { stdio: 'inherit' });
             coverUrl = `https://amirzadehes.github.io/podcast-publisher/${coverPath}`;
+            fs.copyFileSync(coverPath, 'cover.jpg');
         }
 
         const audioUrl = `https://amirzadehes.github.io/podcast-publisher/${audioPath}`;
         const pubDate = publishAt ? new Date(publishAt).toUTCString() : new Date().toUTCString();
 
         let feed = '';
-        if (fs.existsSync('feed.xml')) {
+        if (fs.existsSync('feed.xml') && fs.readFileSync('feed.xml', 'utf8').includes('zadeh.amah@gmail.com')) {
             feed = fs.readFileSync('feed.xml', 'utf8');
         } else {
             feed = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Podcast</title>
+    <title>ذره‌بین</title>
     <link>https://amirzadehes.github.io/podcast-publisher/</link>
-    <description>Podcast Feed</description>
-    <language>de</language>
+    <description>پادکست ذره‌بین</description>
+    <language>fa</language>
+    <itunes:author>Amir Ahmad Hosseinzadeh</itunes:author>
+    <itunes:owner>
+      <itunes:name>ذره‌بین</itunes:name>
+      <itunes:email>zadeh.amah@gmail.com</itunes:email>
+    </itunes:owner>
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:type>episodic</itunes:type>
+    <itunes:category text="Society &amp; Culture"/>
+    <itunes:image href="${coverUrl}"/>
   </channel>
 </rss>`;
         }
@@ -125,9 +137,10 @@ async function run() {
     <item>
       <title><![CDATA[${title}]]></title>
       <description><![CDATA[${description}]]></description>${categoryTag}
-      <enclosure url="${audioUrl}" type="audio/mpeg" />
-      <guid>${audioUrl}</guid>
+      <enclosure url="${audioUrl}" length="${fileSize}" type="audio/mpeg" />
+      <guid isPermaLink="false">ep_${epId}</guid>
       <pubDate>${pubDate}</pubDate>
+      <itunes:explicit>false</itunes:explicit>
       <itunes:image href="${coverUrl}" />
     </item>`;
 
