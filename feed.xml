@@ -1,29 +1,136 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>ذره‌بین</title>
-    <link>https://amirzadehes.github.io/podcast-publisher/</link>
-    <description>پادکست ذره‌بین</description>
-    <language>fa</language>
-    <itunes:author>Amir Ahmad Hosseinzadeh</itunes:author>
-    <itunes:owner>
-      <itunes:name>ذره‌بین</itunes:name>
-      <itunes:email>zadeh.amah@gmail.com</itunes:email>
-    </itunes:owner>
-    <itunes:explicit>false</itunes:explicit>
-    <itunes:type>episodic</itunes:type>
-    <itunes:category text="Society &amp; Culture"/>
-    <itunes:image href="https://amirzadehes.github.io/podcast-publisher/episodes/cover_1792012713128.jpg"/>
-  
-    <item>
-      <title><![CDATA[تست با زمان بندی]]></title>
-      <description><![CDATA[توضیحات]]></description>
-      <category><![CDATA[دسته بندی تستی]]></category>
-      <enclosure url="https://amirzadehes.github.io/podcast-publisher/episodes/ep_1792012713128.mp3" length="200657" type="audio/mpeg" />
-      <guid isPermaLink="false">ep_1792012713128</guid>
-      <pubDate>Wed, 14 Oct 2026 21:19:26 GMT</pubDate>
-      <itunes:explicit>false</itunes:explicit>
-      <itunes:image href="https://amirzadehes.github.io/podcast-publisher/episodes/cover_1792012713128.jpg" />
-    </item>
-  </channel>
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0" xmlns:anchor="https://anchor.fm/xmlns" xmlns:podcast="https://podcastindex.org/namespace/1.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:psc="http://podlove.org/simple-chapters">
+	<channel>
+		<title><![CDATA[ذره‌بین]]></title>
+		<description><![CDATA[هیچ‌چیز در این دنیا معمولی نیست، حتی ساده‌ترین وسایلی که هر روز دست می‌گیرید! «ذره‌بین» یک پادکست کوتاه، دقیق و بدون حاشیه است که سراغ چیزهای روزمره زندگی می‌رود تا رازهای علمی، فنی و شگفت‌انگیز پنهان در باطن آن‌ها را در چند دقیقه کالبدشکافی کند. نگاهی عمیق به دنیایی که فکر می‌کردیم می‌شناسیم.]]></description>
+		<link>https://podcasters.spotify.com/pod/show/amir-zed2</link>
+		<generator>Anchor Podcasts</generator>
+		<lastBuildDate>Wed, 14 Oct 2026 15:33:55 GMT</lastBuildDate>
+		<atom:link href="https://anchor.fm/s/117bc7aec/podcast/rss" rel="self" type="application/rss+xml"/>
+		<author><![CDATA[A.Z]]></author>
+		<copyright><![CDATA[A.Z]]></copyright>
+		<language><![CDATA[fa]]></language>
+		<atom:link rel="hub" href="https://pubsubhubbub.appspot.com/"/>
+		<itunes:author>A.Z</itunes:author>
+		<itunes:summary>هیچ‌چیز در این دنیا معمولی نیست، حتی ساده‌ترین وسایلی که هر روز دست می‌گیرید! «ذره‌بین» یک پادکست کوتاه، دقیق و بدون حاشیه است که سراغ چیزهای روزمره زندگی می‌رود تا رازهای علمی، فنی و شگفت‌انگیز پنهان در باطن آن‌ها را در چند دقیقه کالبدشکافی کند. نگاهی عمیق به دنیایی که فکر می‌کردیم می‌شناسیم.</itunes:summary>
+		<itunes:type>episodic</itunes:type>
+		<itunes:owner>
+			<itunes:name>A.Z</itunes:name>
+			<itunes:email>zadeh.amah@gmail.com</itunes:email>
+		</itunes:owner>
+		<itunes:explicit>false</itunes:explicit>
+		<itunes:category text="Science"/>
+		<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_nologo/46831955/46831955-1791735308997-ce8ded9d59d5a.jpg"/>
+		<item>
+			<title><![CDATA[درمان سرطان با ویروس]]></title>
+			<description><![CDATA[<p>وقتی شیمی‌درمانی به بن‌بست می‌رسد و تومور دوباره بازمی‌گردد، مرز میان نبوغ علمی و خطر کجاست؟ در این قسمت از پادکست «ذره‌بین»، ماجرای جسورانه و پربحث دکتر «بئاتا هالاسی»، ویروس‌شناس دانشگاه زاگرب را بررسی می‌کنیم؛ دانشمندی که پس از شکست درمان‌های رایج، تصمیم گرفت ویروس‌های زنده را مستقیماً به تومور خودش تزریق کند.</p><p><br /></p><p>اما چطور ممکن است عاملی بیماری‌زا مثل ویروس، به سلاحی برای نابودی سرطان تبدیل شود؟ در این اپیزود مکانیزم بیولوژیکی «ویروس‌درمانی انکولیتیک» (Oncolytic Virotherapy) را کالبدشکافی می‌کنیم:</p><p>• چرا سلول‌های سرطانی در برابر حمله ویروس‌ها بی‌دفاع هستند؟</p><p>• ویروس‌ها چگونه تومور را از درون منفجر کرده و سیستم ایمنی خاموش بدن را علیه بیماری بیدار می‌کنند؟</p><p>• جایگاه واقعی این روش در مرزهای فعلی پزشکی نوین چیست و چرا خوددرمانی با آن می‌تواند به بهای جان تمام شود؟</p><p><br /></p>
+]]></description>
+			<link>https://podcasters.spotify.com/pod/show/amir-zed2/episodes/ep-e3qe0mf</link>
+			<guid isPermaLink="false">2f341fad-23a9-4a7b-8bd6-9ff196e92526</guid>
+			<dc:creator><![CDATA[A.Z]]></dc:creator>
+			<pubDate>Wed, 14 Oct 2026 15:30:00 GMT</pubDate>
+			<enclosure url="https://anchor.fm/s/117bc7aec/podcast/play/127385743/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-9-13%2F434050666-44100-2-ad1c52d538004.m4a" length="2751140" type="audio/x-m4a"/>
+			<itunes:summary>&lt;p&gt;وقتی شیمی‌درمانی به بن‌بست می‌رسد و تومور دوباره بازمی‌گردد، مرز میان نبوغ علمی و خطر کجاست؟ در این قسمت از پادکست «ذره‌بین»، ماجرای جسورانه و پربحث دکتر «بئاتا هالاسی»، ویروس‌شناس دانشگاه زاگرب را بررسی می‌کنیم؛ دانشمندی که پس از شکست درمان‌های رایج، تصمیم گرفت ویروس‌های زنده را مستقیماً به تومور خودش تزریق کند.&lt;/p&gt;&lt;p&gt;&lt;br /&gt;&lt;/p&gt;&lt;p&gt;اما چطور ممکن است عاملی بیماری‌زا مثل ویروس، به سلاحی برای نابودی سرطان تبدیل شود؟ در این اپیزود مکانیزم بیولوژیکی «ویروس‌درمانی انکولیتیک» (Oncolytic Virotherapy) را کالبدشکافی می‌کنیم:&lt;/p&gt;&lt;p&gt;• چرا سلول‌های سرطانی در برابر حمله ویروس‌ها بی‌دفاع هستند؟&lt;/p&gt;&lt;p&gt;• ویروس‌ها چگونه تومور را از درون منفجر کرده و سیستم ایمنی خاموش بدن را علیه بیماری بیدار می‌کنند؟&lt;/p&gt;&lt;p&gt;• جایگاه واقعی این روش در مرزهای فعلی پزشکی نوین چیست و چرا خوددرمانی با آن می‌تواند به بهای جان تمام شود؟&lt;/p&gt;&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+</itunes:summary>
+			<itunes:explicit>false</itunes:explicit>
+			<itunes:duration>00:02:50</itunes:duration>
+			<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_episode/46831955/46831955-1791903157728-6916f64b3b171.jpg"/>
+			<itunes:episodeType>full</itunes:episodeType>
+		</item>
+		<item>
+			<title><![CDATA[کورهٔ کیهانی: ستاره‌ها چطور به وجود میان و چطور می‌میرند؟]]></title>
+			<description><![CDATA[<p>شب‌ها که به آسمان نگاه می‌کنیم، نقطه‌های درخشان و آرامی را می‌بینیم و شاید فکر کنیم یک مشت آتش‌بازی ساده در جریان است؛ اما در خلأ سرد فضا که اصلاً اکسیژنی برای سوختن وجود ندارد، این کوره‌ها چطور میلیاردها سال روشن می‌مانند و منفجر یا خاموش نمی‌شوند؟</p><p>در این قسمت از «کاتالوگ»، به درون قلب جوشان ستاره‌ها سرک می‌کشیم؛ جایی که یک رآکتور هسته‌ای طبیعی در یک نبرد دائمی با گرانش خود به سر می‌برد. بررسی می‌کنیم که چگونه خورشید در هر ثانیه ۴ میلیون تن ماده را مستقیماً بر اساس معادله اینشتین به انرژی خالص تبدیل می‌کند، سرنوشت ستاره‌ها بعد از ته کشیدن سوختشان چطور رقم می‌خورد، چرا عنصر آهن نقطه پایان عمر ستاره‌های غول‌پیکر است و چطور تمام طلاهای دنیا و حتی اتم‌های آهن درون خون تک‌تک ما، یادگار خشن‌ترین انفجارهای کیهانی هستند.</p><p><strong>در این اپیزود می‌شنوید:</strong></p><ul><li><p>تعادل هیدرواستاتیکی چیست و چرا جاذبه، ستاره را در خود خرد نمی‌کند؟</p></li><li><p>حساب‌وکتاب کوره خورشید: سوزاندن ۶۰۰ میلیون تن هیدروژن در هر ثانیه.</p></li><li><p>کوتوله سفید و چگالی سرسام‌آور؛ قاشقی از ماده که اندازه یک فیل وزن دارد!</p></li><li><p>بن‌بست آهن؛ چرا همجوشی هسته‌ای ناگهان انرژی می‌بلعد و ستاره در کسری از ثانیه روی خودش آوار می‌شود؟</p></li></ul>
+]]></description>
+			<link>https://podcasters.spotify.com/pod/show/amir-zed2/episodes/ep-e3pfcmu</link>
+			<guid isPermaLink="false">b1fafe7d-378e-4a46-97cc-7ec41f977691</guid>
+			<dc:creator><![CDATA[A.Z]]></dc:creator>
+			<pubDate>Mon, 12 Oct 2026 15:59:15 GMT</pubDate>
+			<enclosure url="https://anchor.fm/s/117bc7aec/podcast/play/126382238/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-8-27%2F432765911-44100-2-6c6b15f1b6f1e.m4a" length="4319807" type="audio/x-m4a"/>
+			<itunes:summary>&lt;p&gt;شب‌ها که به آسمان نگاه می‌کنیم، نقطه‌های درخشان و آرامی را می‌بینیم و شاید فکر کنیم یک مشت آتش‌بازی ساده در جریان است؛ اما در خلأ سرد فضا که اصلاً اکسیژنی برای سوختن وجود ندارد، این کوره‌ها چطور میلیاردها سال روشن می‌مانند و منفجر یا خاموش نمی‌شوند؟&lt;/p&gt;&lt;p&gt;در این قسمت از «کاتالوگ»، به درون قلب جوشان ستاره‌ها سرک می‌کشیم؛ جایی که یک رآکتور هسته‌ای طبیعی در یک نبرد دائمی با گرانش خود به سر می‌برد. بررسی می‌کنیم که چگونه خورشید در هر ثانیه ۴ میلیون تن ماده را مستقیماً بر اساس معادله اینشتین به انرژی خالص تبدیل می‌کند، سرنوشت ستاره‌ها بعد از ته کشیدن سوختشان چطور رقم می‌خورد، چرا عنصر آهن نقطه پایان عمر ستاره‌های غول‌پیکر است و چطور تمام طلاهای دنیا و حتی اتم‌های آهن درون خون تک‌تک ما، یادگار خشن‌ترین انفجارهای کیهانی هستند.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;در این اپیزود می‌شنوید:&lt;/strong&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;p&gt;تعادل هیدرواستاتیکی چیست و چرا جاذبه، ستاره را در خود خرد نمی‌کند؟&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;حساب‌وکتاب کوره خورشید: سوزاندن ۶۰۰ میلیون تن هیدروژن در هر ثانیه.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;کوتوله سفید و چگالی سرسام‌آور؛ قاشقی از ماده که اندازه یک فیل وزن دارد!&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;بن‌بست آهن؛ چرا همجوشی هسته‌ای ناگهان انرژی می‌بلعد و ستاره در کسری از ثانیه روی خودش آوار می‌شود؟&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;
+</itunes:summary>
+			<itunes:explicit>false</itunes:explicit>
+			<itunes:duration>00:04:27</itunes:duration>
+			<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_episode/46831955/46831955-1791731185480-51e1e5e355fe9.jpg"/>
+			<itunes:episodeType>full</itunes:episodeType>
+		</item>
+		<item>
+			<title><![CDATA[کابوس پنهان در بشقاب غذا]]></title>
+			<description><![CDATA[<p>تصور کنید عاملی وجود دارد که نه ویروس است، نه باکتری و نه قارچ؛ اصلاً هیچ ماده ژنتیکی ندارد و زنده نیست، اما وارد مغز می‌شود و بافت آن را مثل یک اسفنج، سوراخ‌سوراخ و نابود می‌کند. عاملی به شدت مقاوم که نه با حرارت اجاق گاز می‌سوزد و نه با اسید معده یا ضدعفونی‌کننده‌ها از بین می‌رود!</p><p>در این قسمت از «کاتالوگ»، پرونده هولناک بیماری <strong>vCJD</strong> (گونه انسانی جنون گاوی) را باز می‌کنیم؛ بیماری مرموزی که از یک طمع صنعتی در خوراک دام‌های بریتانیا در دهه ۱۹۸۰ شروع شد و به سفره غذای انسان‌ها رسید. بررسی می‌کنیم که پریون‌ها چطور کار می‌کنند، چرا این بیماری برخلاف تمام آلزایمرها و پارکینسون‌ها قربانیانش را از میان جوان‌ها انتخاب کرد و چرا حتی امروز، پرونده قربانیان خاموش آن هنوز به طور کامل بسته نشده است.</p><p><strong>در این اپیزود می‌شنوید:</strong></p><ul><li><p>پریون دقیقاً چیست و چطور یک پروتئین کج‌شده، مغز را متلاشی می‌کند؟</p></li><li><p>تفاوت جنون گاوی در حیوانات با بیماری vCJD در انسان‌ها چیست؟</p></li><li><p>تله بیولوژیکی در روده جوانان؛ چرا میانگین سنی قربانیان زیر ۳۰ سال بود؟</p></li><li><p>دوره کمون ۲۰ ساله و ماجرای تکان‌دهنده آخرین قربانیان در آزمایشگاه‌های مدرن.</p></li></ul>
+]]></description>
+			<link>https://podcasters.spotify.com/pod/show/amir-zed2/episodes/ep-e3pfcce</link>
+			<guid isPermaLink="false">8ba03ba2-427f-46bc-b259-f67da4f5929e</guid>
+			<dc:creator><![CDATA[A.Z]]></dc:creator>
+			<pubDate>Fri, 09 Oct 2026 15:30:00 GMT</pubDate>
+			<enclosure url="https://anchor.fm/s/117bc7aec/podcast/play/126381902/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-8-27%2F432765454-44100-2-fc564b6836138.m4a" length="8298407" type="audio/x-m4a"/>
+			<itunes:summary>&lt;p&gt;تصور کنید عاملی وجود دارد که نه ویروس است، نه باکتری و نه قارچ؛ اصلاً هیچ ماده ژنتیکی ندارد و زنده نیست، اما وارد مغز می‌شود و بافت آن را مثل یک اسفنج، سوراخ‌سوراخ و نابود می‌کند. عاملی به شدت مقاوم که نه با حرارت اجاق گاز می‌سوزد و نه با اسید معده یا ضدعفونی‌کننده‌ها از بین می‌رود!&lt;/p&gt;&lt;p&gt;در این قسمت از «کاتالوگ»، پرونده هولناک بیماری &lt;strong&gt;vCJD&lt;/strong&gt; (گونه انسانی جنون گاوی) را باز می‌کنیم؛ بیماری مرموزی که از یک طمع صنعتی در خوراک دام‌های بریتانیا در دهه ۱۹۸۰ شروع شد و به سفره غذای انسان‌ها رسید. بررسی می‌کنیم که پریون‌ها چطور کار می‌کنند، چرا این بیماری برخلاف تمام آلزایمرها و پارکینسون‌ها قربانیانش را از میان جوان‌ها انتخاب کرد و چرا حتی امروز، پرونده قربانیان خاموش آن هنوز به طور کامل بسته نشده است.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;در این اپیزود می‌شنوید:&lt;/strong&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;p&gt;پریون دقیقاً چیست و چطور یک پروتئین کج‌شده، مغز را متلاشی می‌کند؟&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;تفاوت جنون گاوی در حیوانات با بیماری vCJD در انسان‌ها چیست؟&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;تله بیولوژیکی در روده جوانان؛ چرا میانگین سنی قربانیان زیر ۳۰ سال بود؟&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;دوره کمون ۲۰ ساله و ماجرای تکان‌دهنده آخرین قربانیان در آزمایشگاه‌های مدرن.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;
+</itunes:summary>
+			<itunes:explicit>false</itunes:explicit>
+			<itunes:duration>00:08:33</itunes:duration>
+			<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_episode/46831955/46831955-1791731076171-06bb6db6baf3b.jpg"/>
+			<itunes:episodeType>full</itunes:episodeType>
+		</item>
+		<item>
+			<title><![CDATA[چرا احتمالاً هیچ‌وقت از منظومه شمسی بیرون نمی‌ریم]]></title>
+			<description><![CDATA[<p>فضا خیلی بزرگ‌تر از چیزیه که فکر می‌کنیم. تو این اپیزود با هم بررسی می‌کنیم چرا حتی با پیشرفته‌ترین تکنولوژی‌های ممکن، ترک کردن منظومه شمسی برای بشر تقریباً غیرممکن به نظر می‌رسه. از فاصله‌های دیوانه‌وار گرفته تا خطر غبار و سنگ‌های فضایی با سرعت بالا، و این‌که نزدیک‌ترین ستاره‌ها هم چقدر ناامیدکننده‌ان. یه حرف حسابی و مستقیم درباره یکی از بزرگ‌ترین چالش‌های پیش روی انسان</p>
+]]></description>
+			<link>https://podcasters.spotify.com/pod/show/amir-zed2/episodes/ep-e3pg01n</link>
+			<guid isPermaLink="false">65889ff8-986f-4f44-9978-28bbc8556029</guid>
+			<dc:creator><![CDATA[A.Z]]></dc:creator>
+			<pubDate>Wed, 07 Oct 2026 15:30:00 GMT</pubDate>
+			<enclosure url="https://anchor.fm/s/117bc7aec/podcast/play/126402039/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-8-28%2F432793441-44100-2-e32456b6d47b.m4a" length="5581264" type="audio/x-m4a"/>
+			<itunes:summary>&lt;p&gt;فضا خیلی بزرگ‌تر از چیزیه که فکر می‌کنیم. تو این اپیزود با هم بررسی می‌کنیم چرا حتی با پیشرفته‌ترین تکنولوژی‌های ممکن، ترک کردن منظومه شمسی برای بشر تقریباً غیرممکن به نظر می‌رسه. از فاصله‌های دیوانه‌وار گرفته تا خطر غبار و سنگ‌های فضایی با سرعت بالا، و این‌که نزدیک‌ترین ستاره‌ها هم چقدر ناامیدکننده‌ان. یه حرف حسابی و مستقیم درباره یکی از بزرگ‌ترین چالش‌های پیش روی انسان&lt;/p&gt;
+</itunes:summary>
+			<itunes:explicit>false</itunes:explicit>
+			<itunes:duration>00:05:45</itunes:duration>
+			<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_episode/46831955/46831955-1791731940925-3dfc561cf34db.jpg"/>
+			<itunes:episodeType>full</itunes:episodeType>
+		</item>
+		<item>
+			<title><![CDATA[خورشید چطور روشن هست و کی خاموش میشه؟]]></title>
+			<description><![CDATA[<p>خورشید یک گوی جوشان و عظیم وسط خلأ سرد فضاست؛ اما چرا این حجم باورنکردنی از گاز در فضای بی‌انتها پخش نمی‌شود؟ چه نیرویی این هیولا را با این ابعاد منسجم نگه داشته و در قلب آن دقیقاً چه واکنشی رخ می‌دهد؟</p><p>در این قسمت از «ذره بین»، به کالبدشکافی ستاره حیات‌بخش خودمان می‌پردازیم. جرمی معادل ۳۳۳ هزار برابر کره زمین که ۹۹.۸۶ درصد از کل ماده منظومه شمسی را در خود بلعیده است. بررسی می‌کنیم که چگونه در جهنم ۱۵ میلیون درجه‌ای هسته آن، پروتون‌ها با سرعتی دیوانه‌وار به هم جوش می‌خورند تا نور و گرما بیافرینند، تعادل هیدرواستاتیکی چطور مانع فروریختن خورشید می‌شود و سرنوشت نهایی آن پس از پایان سوخت ۵ میلیارد ساله‌اش چیست.</p><p><strong>در این اپیزود می‌شنوید:</strong></p><ul><li><p>جنس واقعی خورشید چیست و چرا جاذبه‌اش مانع فرار گازها به فضا می‌شود؟</p></li><li><p>زنجیره پروتون-پروتون؛ هیدروژن با چه مکانیسمی به هلیوم تبدیل شده و نور تولید می‌کند؟</p></li><li><p>تفاوت سرنوشت خورشید با ستاره‌های غول‌پیکر؛ چرا خورشید هرگز به آهن نمی‌رسد و منفجر نخواهد شد؟</p></li><li><p>فاز غول سرخ و تولد یک کوتوله سفید در سکوت پایانی منظومه شمسی.</p></li></ul>
+]]></description>
+			<link>https://podcasters.spotify.com/pod/show/amir-zed2/episodes/ep-e3pfdir</link>
+			<guid isPermaLink="false">6903a585-1901-4842-83f5-404166ed0a61</guid>
+			<dc:creator><![CDATA[A.Z]]></dc:creator>
+			<pubDate>Mon, 05 Oct 2026 17:00:00 GMT</pubDate>
+			<enclosure url="https://anchor.fm/s/117bc7aec/podcast/play/126383131/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-8-27%2F432767165-44100-2-7cc01f0eb353f.m4a" length="4319793" type="audio/x-m4a"/>
+			<itunes:summary>&lt;p&gt;خورشید یک گوی جوشان و عظیم وسط خلأ سرد فضاست؛ اما چرا این حجم باورنکردنی از گاز در فضای بی‌انتها پخش نمی‌شود؟ چه نیرویی این هیولا را با این ابعاد منسجم نگه داشته و در قلب آن دقیقاً چه واکنشی رخ می‌دهد؟&lt;/p&gt;&lt;p&gt;در این قسمت از «ذره بین»، به کالبدشکافی ستاره حیات‌بخش خودمان می‌پردازیم. جرمی معادل ۳۳۳ هزار برابر کره زمین که ۹۹.۸۶ درصد از کل ماده منظومه شمسی را در خود بلعیده است. بررسی می‌کنیم که چگونه در جهنم ۱۵ میلیون درجه‌ای هسته آن، پروتون‌ها با سرعتی دیوانه‌وار به هم جوش می‌خورند تا نور و گرما بیافرینند، تعادل هیدرواستاتیکی چطور مانع فروریختن خورشید می‌شود و سرنوشت نهایی آن پس از پایان سوخت ۵ میلیارد ساله‌اش چیست.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;در این اپیزود می‌شنوید:&lt;/strong&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;p&gt;جنس واقعی خورشید چیست و چرا جاذبه‌اش مانع فرار گازها به فضا می‌شود؟&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;زنجیره پروتون-پروتون؛ هیدروژن با چه مکانیسمی به هلیوم تبدیل شده و نور تولید می‌کند؟&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;تفاوت سرنوشت خورشید با ستاره‌های غول‌پیکر؛ چرا خورشید هرگز به آهن نمی‌رسد و منفجر نخواهد شد؟&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;فاز غول سرخ و تولد یک کوتوله سفید در سکوت پایانی منظومه شمسی.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;
+</itunes:summary>
+			<itunes:explicit>false</itunes:explicit>
+			<itunes:duration>00:04:27</itunes:duration>
+			<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_episode/46831955/46831955-1791731220556-e57a860db5007.jpg"/>
+			<itunes:episodeType>full</itunes:episodeType>
+		</item>
+		<item>
+			<title><![CDATA[چرا آدامس موزی مزش قوی‌تر از خود موز هست؟]]></title>
+			<description><![CDATA[<p>تا به حال دقت کرده‌اید که چرا طعم آدامس موزی یا بستنی و شیرموز، هیچ شباهتی به موزی که از سوپرمارکت می‌خریم ندارد؟ پاسخ به این معما، در یکی از عجیب‌ترین فجایع کشاورزی قرن بیستم و انقراض طعم اصلی موز نهفته است!</p><p>در این قسمت از «ذره بین»، سراغ میوه‌ای رفته‌ایم که هر روز می‌بینیم، اما تقریباً هیچ چیز از باطن علمی و گذشته تاریک آن نمی‌دانیم. از راز موز «گروس میشل» که با یک قارچ خاکی برای همیشه از سبد غذایی جهان حذف شد، تا ظهور نژاد «کَوِندیش» که امروزه ۹۹ درصد بازار صادرات را تسخیر کرده است. بررسی می‌کنیم که چرا تمام موزهای دنیا کپی ژنتیکیِ همدیگر هستند، چرا چیکیتا و دوله در اصل هیچ فرقی با هم ندارند، چرا موز با جاذبه می‌جنگد تا خمیده شود و چطور تجارت این میوه حتی باعث سرنگونی دولت‌ها شد.</p><p><strong>در این اپیزود می‌شنوید:</strong></p><ul><li><p>چرا اسانس‌های مصنوعی موز بر اساس میوه‌ای منقرض‌شده ساخته شده‌اند؟</p></li><li><p>ماجرای کلونینگ؛ چرا همه موزهای دنیا از نظر ژنتیکی یک درخت واحدند؟</p></li><li><p>پشت‌پرده برندهای چیکیتا و دوله و ریشه خونین اصطلاح «جمهوری موز».</p></li><li><p>پدیده «زمین‌گریزی منفی»؛ چرا موز بر خلاف میوه‌های دیگر کج و رو به بالا رشد می‌کند؟</p></li><li><p>فکت‌های شگفت‌انگیز گیاه‌شناسی: چرا موز درخت نیست، یک توت است و تشعشع رادیواکتیو دارد؟</p></li><li><p>خطر سویه جدید TR4؛ آیا به زودی باید با موز کوندیش هم خداحافظی کنیم؟</p></li></ul>
+]]></description>
+			<link>https://podcasters.spotify.com/pod/show/amir-zed2/episodes/ep-e3pfda5</link>
+			<guid isPermaLink="false">572416b4-2b29-400e-bd40-a2a83f5ffd80</guid>
+			<dc:creator><![CDATA[A.Z]]></dc:creator>
+			<pubDate>Wed, 30 Sep 2026 15:30:00 GMT</pubDate>
+			<enclosure url="https://anchor.fm/s/117bc7aec/podcast/play/126382853/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-8-27%2F432766756-44100-2-ed269d17afbba.m4a" length="6438602" type="audio/x-m4a"/>
+			<itunes:summary>&lt;p&gt;تا به حال دقت کرده‌اید که چرا طعم آدامس موزی یا بستنی و شیرموز، هیچ شباهتی به موزی که از سوپرمارکت می‌خریم ندارد؟ پاسخ به این معما، در یکی از عجیب‌ترین فجایع کشاورزی قرن بیستم و انقراض طعم اصلی موز نهفته است!&lt;/p&gt;&lt;p&gt;در این قسمت از «ذره بین»، سراغ میوه‌ای رفته‌ایم که هر روز می‌بینیم، اما تقریباً هیچ چیز از باطن علمی و گذشته تاریک آن نمی‌دانیم. از راز موز «گروس میشل» که با یک قارچ خاکی برای همیشه از سبد غذایی جهان حذف شد، تا ظهور نژاد «کَوِندیش» که امروزه ۹۹ درصد بازار صادرات را تسخیر کرده است. بررسی می‌کنیم که چرا تمام موزهای دنیا کپی ژنتیکیِ همدیگر هستند، چرا چیکیتا و دوله در اصل هیچ فرقی با هم ندارند، چرا موز با جاذبه می‌جنگد تا خمیده شود و چطور تجارت این میوه حتی باعث سرنگونی دولت‌ها شد.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;در این اپیزود می‌شنوید:&lt;/strong&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;p&gt;چرا اسانس‌های مصنوعی موز بر اساس میوه‌ای منقرض‌شده ساخته شده‌اند؟&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;ماجرای کلونینگ؛ چرا همه موزهای دنیا از نظر ژنتیکی یک درخت واحدند؟&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;پشت‌پرده برندهای چیکیتا و دوله و ریشه خونین اصطلاح «جمهوری موز».&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;پدیده «زمین‌گریزی منفی»؛ چرا موز بر خلاف میوه‌های دیگر کج و رو به بالا رشد می‌کند؟&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;فکت‌های شگفت‌انگیز گیاه‌شناسی: چرا موز درخت نیست، یک توت است و تشعشع رادیواکتیو دارد؟&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;خطر سویه جدید TR4؛ آیا به زودی باید با موز کوندیش هم خداحافظی کنیم؟&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;
+</itunes:summary>
+			<itunes:explicit>false</itunes:explicit>
+			<itunes:duration>00:06:38</itunes:duration>
+			<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_episode/46831955/46831955-1791731150436-70759f3e6252f.jpg"/>
+			<itunes:episodeType>full</itunes:episodeType>
+		</item>
+		<item>
+			<title><![CDATA[شانس یک‌ در میلیاردی: داستان واقعی بیگ‌بنگ]]></title>
+			<description><![CDATA[<p>بیشتر ما تصور می‌کنیم بیگ‌بنگ مثل انفجار یک بمب ساعتی وسط یک فضای تاریک و خالی بوده؛ اما علم فیزیک می‌گوید پیش از آن اصلاً «فضای خالی» وجود نداشته است!</p><p>در این قسمت از «فانوس»، به ۱۳.۸ میلیارد سال پیش و نقطه صفر پیدایش کیهان سرک می‌کشیم؛ جایی که کل جرم ۲ تریلیون کهکشان امروزی در نقطه‌ای کوچک‌تر از هسته یک اتم فشرده شده بود. بررسی می‌کنیم که چگونه بافت فضا در کسر ثانیه‌ای با سرعتی فراتر از نور باز شد، چرا نبرد هولناک میان ماده و پادماده می‌توانست کل جهان را به نیستی بکشاند و چطور بقای ما مدیون یک برتریِ آماریِ «یک در میلیاردی» شد.</p>
+]]></description>
+			<link>https://podcasters.spotify.com/pod/show/amir-zed2/episodes/ep-e3pd4jp</link>
+			<guid isPermaLink="false">bbd20358-5efa-4803-a47e-559727a5a153</guid>
+			<dc:creator><![CDATA[A.Z]]></dc:creator>
+			<pubDate>Fri, 25 Sep 2026 19:39:57 GMT</pubDate>
+			<enclosure url="https://anchor.fm/s/117bc7aec/podcast/play/126308409/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-8-25%2F432667521-44100-2-88e3e400a54ee.m4a" length="6131213" type="audio/x-m4a"/>
+			<itunes:summary>&lt;p&gt;بیشتر ما تصور می‌کنیم بیگ‌بنگ مثل انفجار یک بمب ساعتی وسط یک فضای تاریک و خالی بوده؛ اما علم فیزیک می‌گوید پیش از آن اصلاً «فضای خالی» وجود نداشته است!&lt;/p&gt;&lt;p&gt;در این قسمت از «فانوس»، به ۱۳.۸ میلیارد سال پیش و نقطه صفر پیدایش کیهان سرک می‌کشیم؛ جایی که کل جرم ۲ تریلیون کهکشان امروزی در نقطه‌ای کوچک‌تر از هسته یک اتم فشرده شده بود. بررسی می‌کنیم که چگونه بافت فضا در کسر ثانیه‌ای با سرعتی فراتر از نور باز شد، چرا نبرد هولناک میان ماده و پادماده می‌توانست کل جهان را به نیستی بکشاند و چطور بقای ما مدیون یک برتریِ آماریِ «یک در میلیاردی» شد.&lt;/p&gt;
+</itunes:summary>
+			<itunes:explicit>false</itunes:explicit>
+			<itunes:duration>00:06:19</itunes:duration>
+			<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_episode/46831955/46831955-1791731044031-1359763a9198b.jpg"/>
+			<itunes:episodeType>full</itunes:episodeType>
+		</item>
+	</channel>
 </rss>
