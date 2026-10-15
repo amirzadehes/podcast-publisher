@@ -21,7 +21,7 @@ jobs:
       - name: Install Dependencies and FFmpeg
         if: steps.check_temp.outputs.has_job == 'true'
         run: |
-          sudo apt-get update && sudo apt-get install -y ffmpeg
+          sudo apt-get update && sudo apt-get install -y ffmpeg curl
           npm install googleapis
       - name: Process and Publish
         if: steps.check_temp.outputs.has_job == 'true'
@@ -39,10 +39,10 @@ jobs:
           git config user.name "PodcastBot"
           git config user.email "bot@users.noreply.github.com"
           if [ -f "temp/completed.flag" ]; then
-            git rm -rf temp || true
+            git rm -rf temp episodes || true
           else
             git add temp/meta.json || true
           fi
-          git add feed.xml cover.jpg episodes/ || true
-          git commit -m "Update podcast publish state" || true
+          git add feed.xml || true
+          git commit -m "Publish episode via Archive.org and clean repo" || true
           git push
