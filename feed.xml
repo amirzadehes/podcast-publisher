@@ -20,7 +20,17 @@
 		<itunes:explicit>false</itunes:explicit>
 		<itunes:category text="Science"/>
 		<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_nologo/46831955/46831955-1791735308997-ce8ded9d59d5a.jpg"/>
-		    <item>
+		        <item>
+      <title><![CDATA[تست روز بنجسنه]]></title>
+      <description><![CDATA[توضیحات در مورد بنشنبه]]></description>
+      <category><![CDATA[دسته]]></category>
+      <enclosure url="https://archive.org/download/zarrebin-podcast-1792089346426/ep_1792089346426.mp3" length="3740238" type="audio/mpeg" />
+      <guid isPermaLink="false">ep_1792089346426</guid>
+      <pubDate>Thu, 15 Oct 2026 18:37:48 GMT</pubDate>
+      <itunes:explicit>false</itunes:explicit>
+      <itunes:image href="https://archive.org/download/zarrebin-podcast-1792089346426/cover_1792089346426.jpg" />
+    </item>
+    <item>
       <title><![CDATA[تست برای یوتیوب و اسباتیفیا]]></title>
       <description><![CDATA[توضیحات مربوطه]]></description>
       <category><![CDATA[دسته بندی تست برای هر دو]]></category>
