@@ -1,0 +1,22 @@
+{
+  "title": "هر سه با هم",
+  "description": "توضیح هر سه با هم",
+  "tags": [
+    "تگاول"
+  ],
+  "categoryName": "",
+  "publishAt": null,
+  "platforms": {
+    "youtube": false,
+    "spotify": false,
+    "instagram": false,
+    "tiktok": true
+  },
+  "done": {
+    "youtube": false,
+    "spotify": false,
+    "instagram": false,
+    "tiktok": false
+  },
+  "timestamp": 1792095797563
+}
