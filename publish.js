@@ -182,18 +182,31 @@ async function uploadToTikTok(title, description) {
     }
 
     console.log("Refreshing TikTok Access Token...");
-    const tokenRes = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', new URLSearchParams({
-        client_key: clientKey,
-        client_secret: clientSecret,
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken
-    }), {
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    });
+    let accessToken;
+    try {
+        const tokenRes = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', new URLSearchParams({
+            client_key: clientKey,
+            client_secret: clientSecret,
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken
+        }), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
 
-    const accessToken = tokenRes.data.data.access_token;
+        console.log("TikTok token response:", JSON.stringify(tokenRes.data));
+        
+        accessToken = tokenRes.data.data?.access_token || tokenRes.data.access_token;
+        
+        if (!accessToken) {
+            throw new Error("Access token not found in TikTok response structure.");
+        }
+    } catch (tokenErr) {
+        console.error("Failed to refresh TikTok token:", tokenErr.response?.data || tokenErr.message);
+        throw tokenErr;
+    }
+
     console.log("TikTok Access Token refreshed successfully.");
 
     console.log("Preparing TikTok Content Posting API request...");
