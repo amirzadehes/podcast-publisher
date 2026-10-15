@@ -175,14 +175,28 @@ async function run() {
 async function uploadToTikTok(title, description) {
     const clientKey = process.env.TIKTOK_CLIENT_KEY;
     const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
+    const refreshToken = process.env.TIKTOK_REFRESH_TOKEN;
     
-    if (!clientKey || !clientSecret) {
-        throw new Error("TikTok credentials are missing in GitHub Secrets.");
+    if (!clientKey || !clientSecret || !refreshToken) {
+        throw new Error("TikTok credentials or refresh token are missing in GitHub Secrets.");
     }
 
+    console.log("Refreshing TikTok Access Token...");
+    const tokenRes = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', new URLSearchParams({
+        client_key: clientKey,
+        client_secret: clientSecret,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken
+    }), {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    });
+
+    const accessToken = tokenRes.data.data.access_token;
+    console.log("TikTok Access Token refreshed successfully.");
+
     console.log("Preparing TikTok Content Posting API request...");
-    // ساختار ارسال مستقیم ویدیو از طریق Content Posting API تیک‌تاک
-    const videoStream = fs.createReadStream('vertical.mp4');
     const stats = fs.statSync('vertical.mp4');
 
     const initRes = await axios.post('https://open.tiktokapis.com/v2/post/publish/video/init/', {
@@ -201,12 +215,12 @@ async function uploadToTikTok(title, description) {
         }
     }, {
         headers: {
-            'Authorization': `Bearer ${process.env.TIKTOK_ACCESS_TOKEN || ''}`,
+            'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
         }
     });
 
-    console.log("TikTok init response received.");
+    console.log("TikTok init response received:", initRes.data);
 }
 
 async function handleYouTubePlaylist(youtube, videoId, playlistTitle) {
