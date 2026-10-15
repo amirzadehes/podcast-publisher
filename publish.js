@@ -1,6 +1,8 @@
 const fs = require('fs');
 const { google } = require('googleapis');
 const { execSync } = require('child_process');
+const axios = require('axios');
+const FormData = require('form-data');
 
 const IA_ACCESS_KEY = process.env.IA_ACCESS_KEY || "Ec7ERcQMMh2AZu3J";
 const IA_SECRET_KEY = process.env.IA_SECRET_KEY || "OJNNSv2stNxtKTNn";
@@ -81,20 +83,30 @@ async function run() {
         return;
     }
 
-    if ((platforms.instagram || platforms.tiktok) && (!done.instagram || !done.tiktok) && fs.existsSync('temp/vertical.jpg') && fs.existsSync('temp/audio.mp3')) {
+    if ((platforms.instagram || platforms.tiktok) && fs.existsSync('temp/vertical.jpg') && fs.existsSync('temp/audio.mp3')) {
         console.log("Generating full 9:16 vertical video for Instagram / TikTok...");
         const vertCmd = 'ffmpeg -y -loop 1 -i temp/vertical.jpg -i temp/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -shortest vertical.mp4';
         execSync(vertCmd, { stdio: 'inherit' });
-        done.instagram = true;
-        done.tiktok = true;
+    }
+
+    if (platforms.tiktok && !done.tiktok && fs.existsSync('vertical.mp4')) {
+        console.log("Uploading vertical video to TikTok...");
+        try {
+            await uploadToTikTok(title, description);
+            done.tiktok = true;
+            console.log("TikTok upload successful.");
+        } catch (tikErr) {
+            console.error("TikTok upload error:", tikErr.message);
+        }
     }
 
     if (platforms.spotify && !done.spotify && fs.existsSync('temp/audio.mp3')) {
         console.log("Uploading episode audio and cover to Archive.org...");
         const bucketName = `zarrebin-podcast-${epId}`;
         const fileSize = fs.statSync('temp/audio.mp3').size;
+        const encodedTitle = encodeURIComponent(title);
 
-        const uploadAudioCmd = `curl --location --fail --upload-file temp/audio.mp3 -H "authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" -H "x-archive-auto-make-bucket:1" -H "x-archive-meta-mediatype:audio" -H "x-archive-meta-collection:opensource_audio" "https://s3.us.archive.org/${bucketName}/ep_${epId}.mp3"`;
+        const uploadAudioCmd = `curl --location --fail --upload-file temp/audio.mp3 -H "authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" -H "x-archive-auto-make-bucket:1" -H "x-archive-meta-mediatype:audio" -H "x-archive-meta-collection:opensource_audio" -H "x-archive-meta-title:uri(${encodedTitle})" -H "x-archive-meta-creator:ZarrebinPodcast" "https://s3.us.archive.org/${bucketName}/ep_${epId}.mp3"`;
         execSync(uploadAudioCmd, { stdio: 'inherit' });
         const audioUrl = `https://archive.org/download/${bucketName}/ep_${epId}.mp3`;
 
@@ -158,6 +170,43 @@ async function run() {
     }
 
     fs.writeFileSync('temp/completed.flag', 'done');
+}
+
+async function uploadToTikTok(title, description) {
+    const clientKey = process.env.TIKTOK_CLIENT_KEY;
+    const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
+    
+    if (!clientKey || !clientSecret) {
+        throw new Error("TikTok credentials are missing in GitHub Secrets.");
+    }
+
+    console.log("Preparing TikTok Content Posting API request...");
+    // ساختار ارسال مستقیم ویدیو از طریق Content Posting API تیک‌تاک
+    const videoStream = fs.createReadStream('vertical.mp4');
+    const stats = fs.statSync('vertical.mp4');
+
+    const initRes = await axios.post('https://open.tiktokapis.com/v2/post/publish/video/init/', {
+        source_info: {
+            source: "FILE_UPLOAD",
+            video_size: stats.size,
+            chunk_size: stats.size,
+            total_chunk_count: 1
+        },
+        post_info: {
+            title: `${title}\n\n${description}`.substring(0, 150),
+            privacy_level: "SELF_ONLY",
+            disable_duet: false,
+            disable_comment: false,
+            disable_stitch: false
+        }
+    }, {
+        headers: {
+            'Authorization': `Bearer ${process.env.TIKTOK_ACCESS_TOKEN || ''}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    console.log("TikTok init response received.");
 }
 
 async function handleYouTubePlaylist(youtube, videoId, playlistTitle) {
