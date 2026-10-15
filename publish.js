@@ -2,6 +2,9 @@ const fs = require('fs');
 const { google } = require('googleapis');
 const { execSync } = require('child_process');
 
+const IA_ACCESS_KEY = process.env.IA_ACCESS_KEY || "Ec7ERcQMMh2AZu3J";
+const IA_SECRET_KEY = process.env.IA_SECRET_KEY || "OJNNSv2stNxtKTNn";
+
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function run() {
@@ -79,32 +82,32 @@ async function run() {
     }
 
     if ((platforms.instagram || platforms.tiktok) && (!done.instagram || !done.tiktok) && fs.existsSync('temp/vertical.jpg') && fs.existsSync('temp/audio.mp3')) {
-        console.log("Generating 9:16 vertical video for Instagram / TikTok...");
-        const vertCmd = 'ffmpeg -y -loop 1 -i temp/vertical.jpg -i temp/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -t 59 -shortest vertical.mp4';
+        console.log("Generating full 9:16 vertical video for Instagram / TikTok...");
+        const vertCmd = 'ffmpeg -y -loop 1 -i temp/vertical.jpg -i temp/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -shortest vertical.mp4';
         execSync(vertCmd, { stdio: 'inherit' });
         done.instagram = true;
         done.tiktok = true;
     }
 
     if (platforms.spotify && !done.spotify && fs.existsSync('temp/audio.mp3')) {
-        console.log("Updating Spotify RSS feed for ذره‌بین...");
-        if (!fs.existsSync('episodes')) {
-            fs.mkdirSync('episodes');
-        }
-        const audioPath = `episodes/ep_${epId}.mp3`;
-        fs.copyFileSync('temp/audio.mp3', audioPath);
-        const fileSize = fs.statSync(audioPath).size;
+        console.log("Uploading episode audio and cover to Archive.org...");
+        const bucketName = `zarrebin-podcast-${epId}`;
+        const fileSize = fs.statSync('temp/audio.mp3').size;
+
+        const uploadAudioCmd = `curl --location --fail --upload-file temp/audio.mp3 -H "authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" -H "x-archive-auto-make-bucket:1" -H "x-archive-meta-mediatype:audio" -H "x-archive-meta-collection:opensource_audio" "https://s3.us.archive.org/${bucketName}/ep_${epId}.mp3"`;
+        execSync(uploadAudioCmd, { stdio: 'inherit' });
+        const audioUrl = `https://archive.org/download/${bucketName}/ep_${epId}.mp3`;
 
         let coverUrl = "https://amirzadehes.github.io/podcast-publisher/cover.jpg";
         if (fs.existsSync('temp/square.jpg')) {
-            const coverPath = `episodes/cover_${epId}.jpg`;
-            const scaleCoverCmd = `ffmpeg -y -i temp/square.jpg -vf "scale=1400:1400:force_original_aspect_ratio=increase,crop=1400:1400" ${coverPath}`;
+            const scaleCoverCmd = `ffmpeg -y -i temp/square.jpg -vf "scale=1400:1400:force_original_aspect_ratio=increase,crop=1400:1400" temp/cover_1400.jpg`;
             execSync(scaleCoverCmd, { stdio: 'inherit' });
-            coverUrl = `https://amirzadehes.github.io/podcast-publisher/${coverPath}`;
-            fs.copyFileSync(coverPath, 'cover.jpg');
+
+            const uploadCoverCmd = `curl --location --fail --upload-file temp/cover_1400.jpg -H "authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" "https://s3.us.archive.org/${bucketName}/cover_${epId}.jpg"`;
+            execSync(uploadCoverCmd, { stdio: 'inherit' });
+            coverUrl = `https://archive.org/download/${bucketName}/cover_${epId}.jpg`;
         }
 
-        const audioUrl = `https://amirzadehes.github.io/podcast-publisher/${audioPath}`;
         const pubDate = publishAt ? new Date(publishAt).toUTCString() : new Date().toUTCString();
 
         let feed = '';
@@ -150,7 +153,7 @@ async function run() {
         }
 
         fs.writeFileSync('feed.xml', feed);
-        console.log("Spotify RSS feed updated.");
+        console.log("Spotify RSS feed updated with Archive.org links.");
         done.spotify = true;
     }
 
