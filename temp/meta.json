@@ -1,12 +1,13 @@
 {
   "podcastId": "zarebin",
-  "title": "تست جمعه شب",
-  "description": "اولین احترام",
+  "title": "تست دوم جمغع",
+  "description": "توضیح تست دوم",
   "tags": [
-    "احترام",
-    "بکش_کنار"
+    "توضیح",
+    "تست",
+    "دوم"
   ],
-  "categoryName": "دسته بندی جدید امیرخان",
+  "categoryName": "",
   "publishAt": null,
   "platforms": {
     "youtube": true,
@@ -20,5 +21,5 @@
     "instagram": false,
     "tiktok": false
   },
-  "timestamp": 1792179908075
+  "timestamp": 1792180652424
 }
