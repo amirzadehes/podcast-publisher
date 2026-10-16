@@ -1,16 +1,18 @@
 {
-  "title": "هر سه با هم",
-  "description": "توضیح هر سه با هم",
+  "podcastId": "zarebin",
+  "title": "تست جمعه شب",
+  "description": "اولین احترام",
   "tags": [
-    "تگاول"
+    "احترام",
+    "بکش_کنار"
   ],
-  "categoryName": "",
+  "categoryName": "دسته بندی جدید امیرخان",
   "publishAt": null,
   "platforms": {
-    "youtube": false,
-    "spotify": false,
-    "instagram": false,
-    "tiktok": true
+    "youtube": true,
+    "spotify": true,
+    "instagram": true,
+    "tiktok": false
   },
   "done": {
     "youtube": false,
@@ -18,5 +20,5 @@
     "instagram": false,
     "tiktok": false
   },
-  "timestamp": 1792097645281
+  "timestamp": 1792179908075
 }
