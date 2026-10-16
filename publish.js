@@ -24,7 +24,6 @@ async function run() {
     const tags = Array.isArray(meta.tags) ? meta.tags : [];
     const categoryName = meta.categoryName ? meta.categoryName.trim() : "";
     const publishAt = meta.publishAt || null;
-    const rawVideoUrl = meta.rawVideoUrl || null;
     const platforms = meta.platforms || { youtube: true, spotify: true, instagram: false, tiktok: false };
     const done = meta.done || { youtube: false, spotify: false, instagram: false, tiktok: false };
     const epId = meta.timestamp || Date.now();
@@ -89,50 +88,39 @@ async function run() {
         return;
     }
 
-    if ((platforms.instagram || platforms.tiktok) && (!done.instagram || !done.tiktok)) {
-        if (rawVideoUrl && !fs.existsSync('temp/vertical.mp4')) {
-            console.log(`Downloading large raw video from ${rawVideoUrl}...`);
-            execSync(`curl -L --fail "${rawVideoUrl}" -o temp/vertical.mp4`, { stdio: 'inherit' });
-        }
+    if ((platforms.instagram || platforms.tiktok) && (!done.instagram || !done.tiktok) && fs.existsSync('temp/vertical.jpg') && fs.existsSync('temp/audio.mp3')) {
+        console.log("Generating 9:16 vertical video for Instagram / TikTok...");
+        const vertCmd = 'ffmpeg -y -loop 1 -i temp/vertical.jpg -i temp/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -movflags +faststart -shortest vertical.mp4';
+        execSync(vertCmd, { stdio: 'inherit' });
 
-        const inputVideoPath = fs.existsSync('temp/vertical.mp4')
-            ? 'temp/vertical.mp4'
-            : (fs.existsSync('temp/video.mp4') ? 'temp/video.mp4' : null);
+        console.log("Uploading vertical video to Archive.org...");
+        try {
+            const uploadReelsCmd = `curl --location --fail --upload-file vertical.mp4 -H "authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" -H "x-archive-auto-make-bucket:1" -H "x-archive-meta-mediatype:movies" -H "x-archive-meta-title:uri(${encodedTitle})" -H "x-archive-meta-creator:ZarrebinPodcast" "https://s3.us.archive.org/${bucketName}/reels_${epId}.mp4"`;
+            execSync(uploadReelsCmd, { stdio: 'inherit' });
 
-        if (inputVideoPath) {
-            console.log(`Compressing video (${inputVideoPath}) for Instagram / TikTok...`);
-            const compressCmd = `ffmpeg -y -i "${inputVideoPath}" -c:v libx264 -crf 24 -preset veryfast -r 2 -c:a aac -b:a 192k -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -movflags +faststart vertical_compressed.mp4`;
-            execSync(compressCmd, { stdio: 'inherit' });
+            const directVideoUrl = `https://archive.org/download/${bucketName}/reels_${epId}.mp4`;
+            console.log(`Vertical video uploaded to Archive.org: ${directVideoUrl}`);
+            console.log("Waiting 10 seconds for Archive.org link availability...");
+            await sleep(10000);
 
-            console.log("Uploading compressed video to Archive.org...");
-            try {
-                const uploadReelsCmd = `curl --location --fail --upload-file vertical_compressed.mp4 -H "authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" -H "x-archive-auto-make-bucket:1" -H "x-archive-meta-mediatype:movies" -H "x-archive-meta-title:uri(${encodedTitle})" -H "x-archive-meta-creator:ZarrebinPodcast" "https://s3.us.archive.org/${bucketName}/reels_${epId}.mp4"`;
-                execSync(uploadReelsCmd, { stdio: 'inherit' });
+            const hashtags = tags.length > 0 ? '\n\n' + tags.map(t => t.startsWith('#') ? t : `#${t.replace(/\s+/g, '_')}`).join(' ') : '';
+            const fullCaption = `${title}\n\n${description}${hashtags}`;
 
-                const directVideoUrl = `https://archive.org/download/${bucketName}/reels_${epId}.mp4`;
-                console.log(`Compressed video uploaded to Archive.org: ${directVideoUrl}`);
-                console.log("Waiting 10 seconds for Archive.org link availability...");
-                await sleep(10000);
+            console.log("Sending video data to Make.com webhook...");
+            await axios.post(MAKE_WEBHOOK_URL, {
+                podcast_id: podcastId,
+                title: title,
+                caption: fullCaption,
+                video_url: directVideoUrl,
+                instagram: Boolean(platforms.instagram && !done.instagram),
+                tiktok: Boolean(platforms.tiktok && !done.tiktok)
+            });
 
-                const hashtags = tags.length > 0 ? '\n\n' + tags.map(t => t.startsWith('#') ? t : `#${t.replace(/\s+/g, '_')}`).join(' ') : '';
-                const fullCaption = `${title}\n\n${description}${hashtags}`;
-
-                console.log("Sending video data to Make.com webhook...");
-                await axios.post(MAKE_WEBHOOK_URL, {
-                    podcast_id: podcastId,
-                    title: title,
-                    caption: fullCaption,
-                    video_url: directVideoUrl,
-                    instagram: Boolean(platforms.instagram && !done.instagram),
-                    tiktok: Boolean(platforms.tiktok && !done.tiktok)
-                });
-
-                if (platforms.instagram) done.instagram = true;
-                if (platforms.tiktok) done.tiktok = true;
-                console.log("Make.com webhook triggered successfully.");
-            } catch (err) {
-                console.error("Error in Make.com / Archive.org publishing:", err.response?.data || err.message);
-            }
+            if (platforms.instagram) done.instagram = true;
+            if (platforms.tiktok) done.tiktok = true;
+            console.log("Make.com webhook triggered successfully.");
+        } catch (err) {
+            console.error("Error in Make.com / Archive.org publishing:", err.response?.data || err.message);
         }
     }
 
