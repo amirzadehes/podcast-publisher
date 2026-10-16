@@ -89,19 +89,23 @@ async function run() {
     }
 
     if ((platforms.instagram || platforms.tiktok) && (!done.instagram || !done.tiktok) && fs.existsSync('temp/vertical.jpg') && fs.existsSync('temp/audio.mp3')) {
-        console.log("Generating 9:16 vertical video for Instagram / TikTok...");
-        const vertCmd = 'ffmpeg -y -loop 1 -i temp/vertical.jpg -i temp/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -movflags +faststart -shortest vertical.mp4';
+        console.log("Generating 9:16 vertical video compatible with Instagram Reels & TikTok...");
+        const vertCmd = 'ffmpeg -y -loop 1 -framerate 30 -i temp/vertical.jpg -i temp/audio.mp3 -c:v libx264 -tune stillimage -preset veryfast -crf 28 -r 30 -g 60 -c:a aac -b:a 128k -ar 44100 -ac 2 -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -movflags +faststart -shortest vertical.mp4';
         execSync(vertCmd, { stdio: 'inherit' });
 
-        console.log("Uploading vertical video to Archive.org...");
+        console.log("Uploading vertical video to Catbox for direct non-redirect URL...");
         try {
-            const uploadReelsCmd = `curl --location --fail --upload-file vertical.mp4 -H "authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" -H "x-archive-auto-make-bucket:1" -H "x-archive-meta-mediatype:movies" -H "x-archive-meta-title:uri(${encodedTitle})" -H "x-archive-meta-creator:ZarrebinPodcast" "https://s3.us.archive.org/${bucketName}/reels_${epId}.mp4"`;
-            execSync(uploadReelsCmd, { stdio: 'inherit' });
+            const uploadCmd = `curl -s --fail -F "reqtype=fileupload" -F "fileToUpload=@vertical.mp4" https://catbox.moe/user/api.php`;
+            let directVideoUrl = execSync(uploadCmd).toString().trim();
 
-            const directVideoUrl = `https://archive.org/download/${bucketName}/reels_${epId}.mp4`;
-            console.log(`Vertical video uploaded to Archive.org: ${directVideoUrl}`);
-            console.log("Waiting 10 seconds for Archive.org link availability...");
-            await sleep(10000);
+            if (!directVideoUrl.startsWith('https://files.catbox.moe/')) {
+                console.log("Catbox primary failed, using Litterbox fallback...");
+                const fallbackCmd = `curl -s --fail -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@vertical.mp4" https://litterbox.catbox.moe/resources/internals/api.php`;
+                directVideoUrl = execSync(fallbackCmd).toString().trim();
+            }
+
+            console.log(`Direct video URL ready: ${directVideoUrl}`);
+            await sleep(3000);
 
             const hashtags = tags.length > 0 ? '\n\n' + tags.map(t => t.startsWith('#') ? t : `#${t.replace(/\s+/g, '_')}`).join(' ') : '';
             const fullCaption = `${title}\n\n${description}${hashtags}`;
@@ -120,7 +124,7 @@ async function run() {
             if (platforms.tiktok) done.tiktok = true;
             console.log("Make.com webhook triggered successfully.");
         } catch (err) {
-            console.error("Error in Make.com / Archive.org publishing:", err.response?.data || err.message);
+            console.error("Error in Make.com / Video publishing:", err.response?.data || err.message);
         }
     }
 
