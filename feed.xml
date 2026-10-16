@@ -20,7 +20,17 @@
 		<itunes:explicit>false</itunes:explicit>
 		<itunes:category text="Science"/>
 		<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_nologo/46831955/46831955-1791735308997-ce8ded9d59d5a.jpg"/>
-		        <item>
+		            <item>
+      <title><![CDATA[تست جمعه شب]]></title>
+      <description><![CDATA[اولین احترام]]></description>
+      <category><![CDATA[دسته بندی جدید امیرخان]]></category>
+      <enclosure url="https://archive.org/download/zarrebin-podcast-1792179908075/ep_1792179908075.mp3" length="2762283" type="audio/mpeg" />
+      <guid isPermaLink="false">ep_1792179908075</guid>
+      <pubDate>Fri, 16 Oct 2026 19:48:41 GMT</pubDate>
+      <itunes:explicit>false</itunes:explicit>
+      <itunes:image href="https://archive.org/download/zarrebin-podcast-1792179908075/cover_1792179908075.jpg" />
+    </item>
+    <item>
       <title><![CDATA[تست روز بنجسنه به همراه ادیت]]></title>
       <description><![CDATA[ادیت باید بشه برای تویحانمشس]]></description>
       <category><![CDATA[دسته]]></category>
