@@ -7,6 +7,7 @@ const FormData = require('form-data');
 
 const IA_ACCESS_KEY = process.env.IA_ACCESS_KEY || "Ec7ERcQMMh2AZu3J";
 const IA_SECRET_KEY = process.env.IA_SECRET_KEY || "OJNNSv2stNxtKTNn";
+const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL || "https://hook.eu1.make.com/vxx5wns1pe9s6h4cziei7j3ojhfh8m23";
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -17,6 +18,7 @@ async function run() {
     }
 
     const meta = JSON.parse(fs.readFileSync('temp/meta.json', 'utf8'));
+    const podcastId = meta.podcastId || "zarebin";
     const title = meta.title || "Podcast Episode";
     const description = meta.description || "";
     const tags = Array.isArray(meta.tags) ? meta.tags : [];
@@ -25,6 +27,8 @@ async function run() {
     const platforms = meta.platforms || { youtube: true, spotify: true, instagram: false, tiktok: false };
     const done = meta.done || { youtube: false, spotify: false, instagram: false, tiktok: false };
     const epId = meta.timestamp || Date.now();
+    const bucketName = `zarrebin-podcast-${epId}`;
+    const encodedTitle = encodeURIComponent(title);
 
     const now = new Date();
     const isFuture = publishAt && (new Date(publishAt) > now);
@@ -84,28 +88,49 @@ async function run() {
         return;
     }
 
-    if ((platforms.instagram || platforms.tiktok) && fs.existsSync('temp/vertical.jpg') && fs.existsSync('temp/audio.mp3')) {
-        console.log("Generating full 9:16 vertical video for Instagram / TikTok...");
-        const vertCmd = 'ffmpeg -y -loop 1 -i temp/vertical.jpg -i temp/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -shortest vertical.mp4';
-        execSync(vertCmd, { stdio: 'inherit' });
-    }
+    const inputVideoPath = fs.existsSync('temp/vertical.mp4')
+        ? 'temp/vertical.mp4'
+        : (fs.existsSync('temp/video.mp4') ? 'temp/video.mp4' : null);
 
-    if (platforms.tiktok && !done.tiktok && fs.existsSync('vertical.mp4')) {
-        console.log("Uploading vertical video to TikTok...");
+    if ((platforms.instagram || platforms.tiktok) && (!done.instagram || !done.tiktok) && inputVideoPath) {
+        console.log(`Compressing uploaded video (${inputVideoPath}) for Instagram / TikTok...`);
+        const compressCmd = `ffmpeg -y -i "${inputVideoPath}" -c:v libx264 -crf 24 -preset veryfast -r 2 -c:a aac -b:a 192k -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -movflags +faststart vertical_compressed.mp4`;
+        execSync(compressCmd, { stdio: 'inherit' });
+
+        console.log("Uploading compressed video to Archive.org...");
         try {
-            await uploadToTikTok(title, description);
-            done.tiktok = true;
-            console.log("TikTok upload successful.");
-        } catch (tikErr) {
-            console.error("TikTok upload error:", tikErr.message);
+            const uploadReelsCmd = `curl --location --fail --upload-file vertical_compressed.mp4 -H "authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" -H "x-archive-auto-make-bucket:1" -H "x-archive-meta-mediatype:movies" -H "x-archive-meta-title:uri(${encodedTitle})" -H "x-archive-meta-creator:ZarrebinPodcast" "https://s3.us.archive.org/${bucketName}/reels_${epId}.mp4"`;
+            execSync(uploadReelsCmd, { stdio: 'inherit' });
+
+            const directVideoUrl = `https://archive.org/download/${bucketName}/reels_${epId}.mp4`;
+            console.log(`Compressed video uploaded to Archive.org: ${directVideoUrl}`);
+            console.log("Waiting 10 seconds for Archive.org link availability...");
+            await sleep(10000);
+
+            const hashtags = tags.length > 0 ? '\n\n' + tags.map(t => t.startsWith('#') ? t : `#${t.replace(/\s+/g, '_')}`).join(' ') : '';
+            const fullCaption = `${title}\n\n${description}${hashtags}`;
+
+            console.log("Sending video data to Make.com webhook...");
+            await axios.post(MAKE_WEBHOOK_URL, {
+                podcast_id: podcastId,
+                title: title,
+                caption: fullCaption,
+                video_url: directVideoUrl,
+                instagram: Boolean(platforms.instagram && !done.instagram),
+                tiktok: Boolean(platforms.tiktok && !done.tiktok)
+            });
+
+            if (platforms.instagram) done.instagram = true;
+            if (platforms.tiktok) done.tiktok = true;
+            console.log("Make.com webhook triggered successfully.");
+        } catch (err) {
+            console.error("Error in Make.com / Archive.org publishing:", err.response?.data || err.message);
         }
     }
 
     if (platforms.spotify && !done.spotify && fs.existsSync('temp/audio.mp3')) {
         console.log("Uploading episode audio and cover to Archive.org...");
-        const bucketName = `zarrebin-podcast-${epId}`;
         const fileSize = fs.statSync('temp/audio.mp3').size;
-        const encodedTitle = encodeURIComponent(title);
 
         const uploadAudioCmd = `curl --location --fail --upload-file temp/audio.mp3 -H "authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" -H "x-archive-auto-make-bucket:1" -H "x-archive-meta-mediatype:audio" -H "x-archive-meta-collection:opensource_audio" -H "x-archive-meta-title:uri(${encodedTitle})" -H "x-archive-meta-creator:ZarrebinPodcast" "https://s3.us.archive.org/${bucketName}/ep_${epId}.mp3"`;
         execSync(uploadAudioCmd, { stdio: 'inherit' });
@@ -171,70 +196,6 @@ async function run() {
     }
 
     fs.writeFileSync('temp/completed.flag', 'done');
-}
-
-async function uploadToTikTok(title, description) {
-    const clientKey = process.env.TIKTOK_CLIENT_KEY;
-    const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
-    const refreshToken = process.env.TIKTOK_REFRESH_TOKEN;
-    
-    if (!clientKey || !clientSecret || !refreshToken) {
-        throw new Error("TikTok credentials or refresh token are missing in GitHub Secrets.");
-    }
-
-    console.log("Refreshing TikTok Access Token...");
-    let accessToken;
-    try {
-        const tokenRes = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', new URLSearchParams({
-            client_key: clientKey,
-            client_secret: clientSecret,
-            grant_type: 'refresh_token',
-            refresh_token: refreshToken
-        }), {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        });
-
-        console.log("TikTok token response:", JSON.stringify(tokenRes.data));
-        
-        accessToken = tokenRes.data.data?.access_token || tokenRes.data.access_token;
-        
-        if (!accessToken) {
-            throw new Error("Access token not found in TikTok response structure.");
-        }
-    } catch (tokenErr) {
-        console.error("Failed to refresh TikTok token:", tokenErr.response?.data || tokenErr.message);
-        throw tokenErr;
-    }
-
-    console.log("TikTok Access Token refreshed successfully.");
-
-    console.log("Preparing TikTok Content Posting API request...");
-    const stats = fs.statSync('vertical.mp4');
-
-    const initRes = await axios.post('https://open.tiktokapis.com/v2/post/publish/video/init/', {
-        source_info: {
-            source: "FILE_UPLOAD",
-            video_size: stats.size,
-            chunk_size: stats.size,
-            total_chunk_count: 1
-        },
-        post_info: {
-            title: `${title}\n\n${description}`.substring(0, 150),
-            privacy_level: "SELF_ONLY",
-            disable_duet: false,
-            disable_comment: false,
-            disable_stitch: false
-        }
-    }, {
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-        }
-    });
-
-    console.log("TikTok init response received:", initRes.data);
 }
 
 async function handleYouTubePlaylist(youtube, videoId, playlistTitle) {
