@@ -17,6 +17,7 @@
         .platforms input[type="checkbox"] { margin-left: 8px; transform: scale(1.2); cursor: pointer; }
         button { width: 100%; background: #0d6efd; color: white; border: none; padding: 14px; margin-top: 25px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; font-family: Tahoma, sans-serif; }
         button:hover { background: #0b5ed7; }
+        button:disabled { background: #444; color: #888; cursor: not-allowed; }
         .btn-secondary { background: #198754; margin-top: 10px; }
         .btn-secondary:hover { background: #157347; }
         #status, #editStatus { margin-top: 15px; text-align: center; font-weight: bold; line-height: 1.6; }
@@ -24,6 +25,11 @@
         .ep-item input, .ep-item textarea { margin-bottom: 10px; }
         .ep-save-btn { background: #ffc107; color: #000; padding: 10px; margin-top: 5px; font-size: 14px; }
         .ep-save-btn:hover { background: #e0a800; }
+        .search-box { display: none; margin-top: 15px; }
+        .pagination { display: none; justify-content: space-between; align-items: center; gap: 10px; margin-top: 20px; background: #252525; padding: 10px 15px; border-radius: 8px; border: 1px solid #383838; }
+        .pagination button { margin-top: 0; padding: 10px; font-size: 14px; width: 40%; background: #3b4252; }
+        .pagination button:hover:not(:disabled) { background: #4c566a; }
+        .page-info { font-size: 14px; color: #ccc; font-weight: bold; text-align: center; }
     </style>
 </head>
 <body>
@@ -76,8 +82,19 @@
 <div class="container">
     <h3>مدیریت و ویرایش اپیزودهای اسپاتیفای</h3>
     <button class="btn-secondary" onclick="loadEpisodesForEdit()">نمایش لیست اپیزودها برای ویرایش عنوان / توضیحات</button>
+    
+    <div id="searchContainer" class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 جستجو در عنوان یا توضیحات اپیزودها..." oninput="handleSearch()">
+    </div>
+
     <div id="editStatus"></div>
     <div id="episodesList"></div>
+
+    <div id="paginationContainer" class="pagination">
+        <button id="prevBtn" onclick="changePage(-1)">❮ ۵ اپیزود قبلی</button>
+        <span id="pageInfo" class="page-info">صفحه ۱ از ۱</span>
+        <button id="nextBtn" onclick="changePage(1)">۵ اپیزود بعدی ❯</button>
+    </div>
 </div>
 
 <script>
@@ -258,11 +275,17 @@
     }
 
     let currentFeedXml = '';
+    let allEpisodes = [];
+    let filteredEpisodes = [];
+    let currentPage = 1;
+    const pageSize = 5;
 
     async function loadEpisodesForEdit() {
         const token = document.getElementById('ghToken').value.trim();
         const editStatus = document.getElementById('editStatus');
         const listDiv = document.getElementById('episodesList');
+        const searchContainer = document.getElementById('searchContainer');
+        const paginationContainer = document.getElementById('paginationContainer');
 
         if (!token) {
             alert('لطفاً ابتدا توکن گیت‌هاب را در بالای صفحه وارد کنید.');
@@ -272,6 +295,8 @@
         editStatus.style.color = '#76d7c4';
         editStatus.innerText = 'در حال دریافت لیست اپیزودها...';
         listDiv.innerHTML = '';
+        searchContainer.style.display = 'none';
+        paginationContainer.style.display = 'none';
 
         try {
             const url = `https://api.github.com/repos/${owner}/${repo}/contents/feed.xml`;
@@ -295,28 +320,97 @@
                 return;
             }
 
-            editStatus.innerText = `${items.length} اپیزود یافت شد. می‌توانید عنوان یا توضیحات هر کدام را تغییر داده و ذخیره کنید:`;
-
+            allEpisodes = [];
             for (let i = 0; i < items.length; i++) {
                 const titleNode = items[i].getElementsByTagName("title")[0];
                 const descNode = items[i].getElementsByTagName("description")[0];
-                const epTitle = titleNode ? titleNode.textContent : '';
-                const epDesc = descNode ? descNode.textContent : '';
-
-                const itemBox = document.createElement('div');
-                itemBox.className = 'ep-item';
-                itemBox.innerHTML = `
-                    <label>عنوان اپیزود ${i + 1}:</label>
-                    <input type="text" id="edit_title_${i}" value="${epTitle.replace(/"/g, '&quot;')}">
-                    <label>توضیحات اپیزود ${i + 1}:</label>
-                    <textarea rows="3" id="edit_desc_${i}">${epDesc.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-                    <button class="ep-save-btn" onclick="saveEpisodeEdit(${i})">ذخیره تغییرات این اپیزود در اسپاتیفای</button>
-                `;
-                listDiv.appendChild(itemBox);
+                allEpisodes.push({
+                    originalIndex: i,
+                    title: titleNode ? titleNode.textContent : '',
+                    description: descNode ? descNode.textContent : ''
+                });
             }
+
+            document.getElementById('searchInput').value = '';
+            filteredEpisodes = [...allEpisodes];
+            currentPage = 1;
+
+            searchContainer.style.display = 'block';
+            renderEpisodesPage();
         } catch (err) {
             editStatus.style.color = '#e74c3c';
             editStatus.innerText = 'خطا: ' + err.message;
+        }
+    }
+
+    function handleSearch() {
+        const query = document.getElementById('searchInput').value.trim().toLowerCase();
+        if (!query) {
+            filteredEpisodes = [...allEpisodes];
+        } else {
+            filteredEpisodes = allEpisodes.filter(ep =>
+                ep.title.toLowerCase().includes(query) ||
+                ep.description.toLowerCase().includes(query)
+            );
+        }
+        currentPage = 1;
+        renderEpisodesPage();
+    }
+
+    function changePage(direction) {
+        const totalPages = Math.ceil(filteredEpisodes.length / pageSize) || 1;
+        const nextPage = currentPage + direction;
+        if (nextPage >= 1 && nextPage <= totalPages) {
+            currentPage = nextPage;
+            renderEpisodesPage();
+        }
+    }
+
+    function renderEpisodesPage() {
+        const listDiv = document.getElementById('episodesList');
+        const editStatus = document.getElementById('editStatus');
+        const paginationContainer = document.getElementById('paginationContainer');
+        const pageInfo = document.getElementById('pageInfo');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        listDiv.innerHTML = '';
+
+        if (filteredEpisodes.length === 0) {
+            editStatus.style.color = '#ffc107';
+            editStatus.innerText = 'هیچ اپیزودی با این عبارت یافت نشد.';
+            paginationContainer.style.display = 'none';
+            return;
+        }
+
+        const totalPages = Math.ceil(filteredEpisodes.length / pageSize);
+        const startIndex = (currentPage - 1) * pageSize;
+        const pageItems = filteredEpisodes.slice(startIndex, startIndex + pageSize);
+
+        editStatus.style.color = '#76d7c4';
+        editStatus.innerText = `نمایش ${startIndex + 1} تا ${startIndex + pageItems.length} از مجموع ${filteredEpisodes.length} اپیزود:`;
+
+        pageItems.forEach(ep => {
+            const idx = ep.originalIndex;
+            const itemBox = document.createElement('div');
+            itemBox.className = 'ep-item';
+            itemBox.innerHTML = `
+                <label>عنوان اپیزود ${idx + 1}:</label>
+                <input type="text" id="edit_title_${idx}" value="${ep.title.replace(/"/g, '&quot;')}">
+                <label>توضیحات اپیزود ${idx + 1}:</label>
+                <textarea rows="3" id="edit_desc_${idx}">${ep.description.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                <button class="ep-save-btn" onclick="saveEpisodeEdit(${idx})">ذخیره تغییرات این اپیزود در اسپاتیفای</button>
+            `;
+            listDiv.appendChild(itemBox);
+        });
+
+        if (totalPages > 1) {
+            paginationContainer.style.display = 'flex';
+            pageInfo.innerText = `صفحه ${currentPage} از ${totalPages}`;
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+        } else {
+            paginationContainer.style.display = 'none';
         }
     }
 
@@ -343,6 +437,12 @@
             const b64Xml = btoa(unescape(encodeURIComponent(updatedXml)));
             await sendToGitHub(token, b64Xml, 'feed.xml');
             currentFeedXml = updatedXml;
+
+            const epInAll = allEpisodes.find(e => e.originalIndex === index);
+            if (epInAll) {
+                epInAll.title = newTitle;
+                epInAll.description = newDesc;
+            }
 
             editStatus.style.color = '#2ecc71';
             editStatus.innerText = '✅ تغییرات با موفقیت در فید ذخیره شد و به زودی در اسپاتیفای به‌روزرسانی می‌شود!';
