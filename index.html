@@ -72,7 +72,6 @@
         <label><input type="checkbox" id="platYoutube" checked> یوتیوب (YouTube)</label>
         <label><input type="checkbox" id="platSpotify" checked> اسپاتیفای (Spotify RSS)</label>
         <label><input type="checkbox" id="platInstagram" checked> اینستاگرام (Instagram)</label>
-        <label><input type="checkbox" id="platTiktok" checked> تیک‌تاک (TikTok)</label>
     </div>
 
     <button onclick="publishEpisode()">ساخت ویدیو و انتشار</button>
@@ -132,7 +131,6 @@
         const platYoutube = document.getElementById('platYoutube').checked;
         const platSpotify = document.getElementById('platSpotify').checked;
         const platInstagram = document.getElementById('platInstagram').checked;
-        const platTiktok = document.getElementById('platTiktok').checked;
 
         const statusDiv = document.getElementById('status');
 
@@ -146,8 +144,8 @@
             return;
         }
 
-        if ((platInstagram || platTiktok) && !imgVertical) {
-            alert('برای انتشار در اینستاگرام یا تیک‌تاک، لطفاً عکس عمودی (۹:۱۶) را انتخاب کنید.');
+        if (platInstagram && !imgVertical) {
+            alert('برای انتشار در اینستاگرام، لطفاً عکس عمودی (۹:۱۶) را انتخاب کنید.');
             return;
         }
 
@@ -195,14 +193,12 @@
                 platforms: {
                     youtube: platYoutube,
                     spotify: platSpotify,
-                    instagram: platInstagram,
-                    tiktok: platTiktok
+                    instagram: platInstagram
                 },
                 done: {
                     youtube: false,
                     spotify: false,
-                    instagram: false,
-                    tiktok: false
+                    instagram: false
                 },
                 timestamp: Date.now()
             };
