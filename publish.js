@@ -1,359 +1,119 @@
 const fs = require('fs');
-const { google } = require('googleapis');
-const { execSync } = require('child_process');
-const path = require('path');
 const axios = require('axios');
+const { google } = require('googleapis');
 const FormData = require('form-data');
 
-const IA_ACCESS_KEY = process.env.IA_ACCESS_KEY || "Ec7ERcQMMh2AZu3J";
-const IA_SECRET_KEY = process.env.IA_SECRET_KEY || "OJNNSv2stNxtKTNn";
-const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL || "https://hook.eu1.make.com/vxx5wns1pe9s6h4cziei7j3ojhfh8m23";
+async function main() {
+    console.log("🚀 Starting podcast publishing pipeline...");
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    const title = process.env.EPISODE_TITLE || "New Episode";
+    const description = process.env.EPISODE_DESCRIPTION || "";
+    const audioUrl = process.env.AUDIO_URL;
+    const coverUrl = process.env.COVER_URL;
+    const tagsEnv = process.env.EPISODE_TAGS || "";
+    const tags = tagsEnv.split(',').map(t => t.trim()).filter(Boolean);
 
-async function run() {
-    if (!fs.existsSync('temp/meta.json')) {
-        console.log("No meta.json found in temp folder.");
-        return;
+    if (!audioUrl) {
+        throw new Error("❌ Audio URL is missing!");
     }
 
-    const meta = JSON.parse(fs.readFileSync('temp/meta.json', 'utf8'));
-    const podcastId = meta.podcastId || "zarebin";
-    const title = meta.title || "Podcast Episode";
-    const description = meta.description || "";
-    const tags = Array.isArray(meta.tags) ? meta.tags : [];
-    const categoryName = meta.categoryName ? meta.categoryName.trim() : "";
-    const publishAt = meta.publishAt || null;
-    const platforms = meta.platforms || { youtube: true, spotify: true, instagram: false, tiktok: false };
-    const done = meta.done || { youtube: false, spotify: false, instagram: false, tiktok: false };
-    const epId = meta.timestamp || Date.now();
-    const bucketName = `zarrebin-podcast-${epId}`;
-    const encodedTitle = encodeURIComponent(title);
+    // 1. دانلود فایل صوتی و کاور
+    console.log("📥 Downloading audio and cover assets...");
+    const audioBuffer = (await axios.get(audioUrl, { responseType: 'arraybuffer' })).data;
+    fs.writeFileSync('audio.mp3', audioBuffer);
 
-    const now = new Date();
-    const isFuture = publishAt && (new Date(publishAt) > now);
-
-    if (platforms.youtube && !done.youtube && fs.existsSync('temp/horizontal.jpg') && fs.existsSync('temp/audio.mp3')) {
-        console.log("Generating 16:9 video for YouTube...");
-        const ytCmd = 'ffmpeg -y -loop 1 -i temp/horizontal.jpg -i temp/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -shortest youtube.mp4';
-        execSync(ytCmd, { stdio: 'inherit' });
-
-        const oauth2Client = new google.auth.OAuth2(
-            process.env.YT_CLIENT_ID,
-            process.env.YT_CLIENT_SECRET,
-            "https://developers.google.com/oauthplayground"
-        );
-
-        oauth2Client.setCredentials({
-            refresh_token: process.env.YT_REFRESH_TOKEN
-        });
-
-        const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
-
-        const statusObj = isFuture
-            ? { privacyStatus: 'private', publishAt: publishAt }
-            : { privacyStatus: 'public' };
-
-        console.log("Uploading to YouTube...");
-        const res = await youtube.videos.insert({
-            part: 'snippet,status',
-            requestBody: {
-                snippet: {
-                    title: title,
-                    description: description,
-                    tags: tags,
-                    categoryId: '22'
-                },
-                status: statusObj
-            },
-            media: {
-                body: fs.createReadStream('youtube.mp4')
-            }
-        });
-
-        const videoId = res.data.id;
-        console.log(`YouTube upload complete. ID: ${videoId}`);
-
-        if (categoryName) {
-            await handleYouTubePlaylist(youtube, videoId, categoryName);
-        }
-
-        done.youtube = true;
+    if (coverUrl) {
+        const coverBuffer = (await axios.get(coverUrl, { responseType: 'arraybuffer' })).data;
+        fs.writeFileSync('cover.jpg', coverBuffer);
+    } else {
+        // ایجاد یک کاور پیش‌فرض در صورت نبودن
+        fs.writeFileSync('cover.jpg', Buffer.alloc(0));
     }
 
-    if (isFuture) {
-        console.log(`Scheduled time (${publishAt}) has not arrived yet for other platforms. Keeping files in temp.`);
-        meta.done = done;
-        fs.writeFileSync('temp/meta.json', JSON.stringify(meta, null, 2));
-        return;
-    }
+    // 2. ساخت ویدیوها با FFmpeg
+    console.log("🎬 Generating videos using FFmpeg...");
+    const { execSync } = require('child_process');
+    // ساخت ویدیوی افقی برای یوتیوب
+    execSync('ffmpeg -loop 1 -i cover.jpg -i audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -shortest output.mp4 -y');
+    // ساخت ویدیوی عمودی برای اینستاگرام و تیک‌تاک
+    execSync('ffmpeg -loop 1 -i cover.jpg -i audio.mp3 -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -shortest vertical.mp4 -y');
 
-    if ((platforms.instagram || platforms.tiktok) && (!done.instagram || !done.tiktok) && fs.existsSync('temp/vertical.jpg') && fs.existsSync('temp/audio.mp3')) {
-        console.log("Generating 9:16 vertical video compatible with Instagram Reels & TikTok...");
-        const vertCmd = 'ffmpeg -y -loop 1 -framerate 30 -i temp/vertical.jpg -i temp/audio.mp3 -c:v libx264 -tune stillimage -preset veryfast -crf 28 -r 30 -g 60 -c:a aac -b:a 128k -ar 44100 -ac 2 -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -movflags +faststart -shortest vertical.mp4';
-        execSync(vertCmd, { stdio: 'inherit' });
-    }
-
-    if (platforms.instagram && !done.instagram && fs.existsSync('vertical.mp4')) {
-        console.log("Uploading vertical video to Catbox for Instagram Reels...");
-        try {
-            const uploadCmd = `curl -s --fail -F "reqtype=fileupload" -F "fileToUpload=@vertical.mp4" https://catbox.moe/user/api.php`;
-            let directVideoUrl = execSync(uploadCmd).toString().trim();
-
-            if (!directVideoUrl.startsWith('https://files.catbox.moe/')) {
-                console.log("Catbox primary failed, using Litterbox fallback...");
-                const fallbackCmd = `curl -s --fail -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@vertical.mp4" https://litterbox.catbox.moe/resources/internals/api.php`;
-                directVideoUrl = execSync(fallbackCmd).toString().trim();
-            }
-
-            console.log(`Direct video URL ready: ${directVideoUrl}`);
-            await sleep(3000);
-
-            const hashtags = tags.length > 0 ? '\n\n' + tags.map(t => t.startsWith('#') ? t : `#${t.replace(/\s+/g, '_')}`).join(' ') : '';
-            const fullCaption = `${title}\n\n${description}${hashtags}`;
-
-            console.log("Sending video data to Make.com webhook...");
-            await axios.post(MAKE_WEBHOOK_URL, {
-                podcast_id: podcastId,
-                title: title,
-                caption: fullCaption,
-                video_url: directVideoUrl
-            });
-
-            done.instagram = true;
-            console.log("Make.com webhook triggered successfully for Instagram.");
-        } catch (err) {
-            console.error("Error in Instagram publishing:", err.response?.data || err.message);
-        }
-    }
-
-    if (platforms.tiktok && !done.tiktok && fs.existsSync('vertical.mp4')) {
-        console.log("Uploading vertical video to TikTok...");
-        try {
-            await uploadToTikTok(title, description, tags);
-            done.tiktok = true;
-            console.log("TikTok upload completed successfully.");
-        } catch (tikErr) {
-            console.error("TikTok upload error:", tikErr.response?.data || tikErr.message);
-        }
-    }
-
-    if (platforms.spotify && !done.spotify && fs.existsSync('temp/audio.mp3')) {
-        console.log("Uploading episode audio and cover to Archive.org...");
-        const fileSize = fs.statSync('temp/audio.mp3').size;
-
-        const uploadAudioCmd = `curl --location --fail --upload-file temp/audio.mp3 -H "authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" -H "x-archive-auto-make-bucket:1" -H "x-archive-meta-mediatype:audio" -H "x-archive-meta-collection:opensource_audio" -H "x-archive-meta-title:uri(${encodedTitle})" -H "x-archive-meta-creator:ZarrebinPodcast" "https://s3.us.archive.org/${bucketName}/ep_${epId}.mp3"`;
-        execSync(uploadAudioCmd, { stdio: 'inherit' });
-        const audioUrl = `https://archive.org/download/${bucketName}/ep_${epId}.mp3`;
-
-        let coverUrl = "https://amirzadehes.github.io/podcast-publisher/cover.jpg";
-        if (fs.existsSync('temp/square.jpg')) {
-            const scaleCoverCmd = `ffmpeg -y -i temp/square.jpg -vf "scale=1400:1400:force_original_aspect_ratio=increase,crop=1400:1400" temp/cover_1400.jpg`;
-            execSync(scaleCoverCmd, { stdio: 'inherit' });
-
-            const uploadCoverCmd = `curl --location --fail --upload-file temp/cover_1400.jpg -H "authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" "https://s3.us.archive.org/${bucketName}/cover_${epId}.jpg"`;
-            execSync(uploadCoverCmd, { stdio: 'inherit' });
-            coverUrl = `https://archive.org/download/${bucketName}/cover_${epId}.jpg`;
-        }
-
-        const pubDate = publishAt ? new Date(publishAt).toUTCString() : new Date().toUTCString();
-
-        let feed = '';
-        if (fs.existsSync('feed.xml') && fs.readFileSync('feed.xml', 'utf8').includes('<channel>')) {
-            feed = fs.readFileSync('feed.xml', 'utf8');
-        } else {
-            feed = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>ذره‌بین</title>
-    <link>https://amirzadehes.github.io/podcast-publisher/</link>
-    <description>پادکست ذره‌بین</description>
-    <language>fa</language>
-    <itunes:author>Amir Ahmad Hosseinzadeh</itunes:author>
-    <itunes:owner>
-      <itunes:name>ذره‌بین</itunes:name>
-      <itunes:email>zadeh.amah@gmail.com</itunes:email>
-    </itunes:owner>
-    <itunes:explicit>false</itunes:explicit>
-    <itunes:type>episodic</itunes:type>
-    <itunes:category text="Society &amp; Culture"/>
-    <itunes:image href="${coverUrl}"/>
-  </channel>
-</rss>`;
-        }
-
-        const categoryTag = categoryName ? `\n      <category><![CDATA[${categoryName}]]></category>` : '';
-
-        const newItem = `    <item>
-      <title><![CDATA[${title}]]></title>
-      <description><![CDATA[${description}]]></description>${categoryTag}
-      <enclosure url="${audioUrl}" length="${fileSize}" type="audio/mpeg" />
-      <guid isPermaLink="false">ep_${epId}</guid>
-      <pubDate>${pubDate}</pubDate>
-      <itunes:explicit>false</itunes:explicit>
-      <itunes:image href="${coverUrl}" />
-    </item>`;
-
-        if (feed.includes('<item>')) {
-            feed = feed.replace('<item>', `${newItem}\n    <item>`);
-        } else {
-            feed = feed.replace('</channel>', `${newItem}\n  </channel>`);
-        }
-
-        fs.writeFileSync('feed.xml', feed);
-        console.log("Spotify RSS feed updated with Archive.org links.");
-        done.spotify = true;
-    }
-
-    fs.writeFileSync('temp/completed.flag', 'done');
-}
-
-async function uploadToTikTok(title, description, tags) {
-    const clientKey = process.env.TIKTOK_CLIENT_KEY;
-    const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
-    const refreshToken = process.env.TIKTOK_REFRESH_TOKEN;
-
-    if (!clientKey || !clientSecret || !refreshToken) {
-        throw new Error("TikTok credentials or refresh token are missing in GitHub Secrets.");
-    }
-
-    console.log("Refreshing TikTok Access Token...");
-    const tokenRes = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', new URLSearchParams({
-        client_key: clientKey,
-        client_secret: clientSecret,
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken
-    }), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-
-    const accessToken = tokenRes.data.data?.access_token || tokenRes.data.access_token;
-    if (!accessToken) {
-        throw new Error("Access token not found in TikTok response: " + JSON.stringify(tokenRes.data));
-    }
-
-    const stats = fs.statSync('vertical.mp4');
-    const videoSize = stats.size;
-    const hashtags = tags && tags.length > 0 ? ' ' + tags.map(t => t.startsWith('#') ? t : `#${t.replace(/\s+/g, '_')}`).join(' ') : '';
-    const fullTitle = `${title} - ${description}${hashtags}`.substring(0, 150);
-
-    console.log(`Initializing TikTok upload (${videoSize} bytes)...`);
-    const initRes = await axios.post('https://open.tiktokapis.com/v2/post/publish/video/init/', {
-        post_info: {
-            title: fullTitle,
-            privacy_level: "SELF_ONLY",
-            disable_duet: false,
-            disable_comment: false,
-            disable_stitch: false
-        },
-        source_info: {
-            source: "FILE_UPLOAD",
-            video_size: videoSize,
-            chunk_size: videoSize,
-            total_chunk_count: 1
-        }
-    }, {
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json; charset=UTF-8'
-        }
-    });
-
-    const uploadUrl = initRes.data?.data?.upload_url;
-    if (!uploadUrl) {
-        throw new Error("Failed to get TikTok upload_url: " + JSON.stringify(initRes.data));
-    }
-
-    console.log("Uploading video binary stream to TikTok server...");
-    const videoBuffer = fs.readFileSync('vertical.mp4');
-    await axios.put(uploadUrl, videoBuffer, {
-        headers: {
-            'Content-Type': 'video/mp4',
-            'Content-Length': videoSize,
-            'Content-Range': `bytes 0-${videoSize - 1}/${videoSize}`
-        },
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity
-    });
-
-    console.log("Video binary uploaded to TikTok successfully!");
-}
-
-async function handleYouTubePlaylist(youtube, videoId, playlistTitle) {
+    // آپلود ویدیو در یک هاست موقت برای دسترسی Make.com (جهت اینستاگرام و تیک‌تاک)
+    let verticalVideoUrl = "";
     try {
-        let playlistId = null;
-        let nextPageToken = null;
-
-        do {
-            const plRes = await youtube.playlists.list({
-                part: 'snippet',
-                mine: true,
-                maxResults: 50,
-                pageToken: nextPageToken
-            });
-
-            if (plRes.data.items) {
-                const found = plRes.data.items.find(item => item.snippet.title.trim().toLowerCase() === playlistTitle.trim().toLowerCase());
-                if (found) {
-                    playlistId = found.id;
-                    console.log(`Found existing playlist "${playlistTitle}" with ID: ${playlistId}`);
-                    break;
-                }
-            }
-            nextPageToken = plRes.data.nextPageToken;
-        } while (nextPageToken);
-
-        if (!playlistId) {
-            console.log(`Playlist "${playlistTitle}" not found. Creating new playlist...`);
-            const createRes = await youtube.playlists.insert({
-                part: 'snippet,status',
-                requestBody: {
-                    snippet: {
-                        title: playlistTitle,
-                        description: `پلی‌لیست ${playlistTitle}`
-                    },
-                    status: {
-                        privacyStatus: 'public'
-                    }
-                }
-            });
-            playlistId = createRes.data.id;
-            console.log(`Created new playlist with ID: ${playlistId}. Waiting 5 seconds for YouTube indexing...`);
-            await sleep(5000);
-        } else {
-            await sleep(2000);
-        }
-
-        for (let attempt = 1; attempt <= 3; attempt++) {
-            try {
-                await youtube.playlistItems.insert({
-                    part: 'snippet',
-                    requestBody: {
-                        snippet: {
-                            playlistId: playlistId,
-                            resourceId: {
-                                kind: 'youtube#video',
-                                videoId: videoId
-                            }
-                        }
-                    }
-                });
-                console.log(`Successfully added video ${videoId} to playlist "${playlistTitle}".`);
-                break;
-            } catch (insertErr) {
-                console.error(`Attempt ${attempt} to add video to playlist failed: ${insertErr.message}`);
-                if (attempt < 3) {
-                    console.log("Retrying in 4 seconds...");
-                    await sleep(4000);
-                }
-            }
-        }
-    } catch (err) {
-        console.error("Error managing YouTube playlist:", err.message);
+        console.log("☁️ Uploading vertical video to temporary host for social media...");
+        const form = new FormData();
+        form.append('reqtype', 'fileupload');
+        form.append('fileToUpload', fs.createReadStream('vertical.mp4'));
+        const catboxRes = await axios.post('https://catbox.moe/user/api.php', form, {
+            headers: form.getHeaders()
+        });
+        verticalVideoUrl = catboxRes.data;
+        console.log("✅ Vertical video uploaded successfully:", verticalVideoUrl);
+    } catch (e) {
+        console.log("⚠️ Could not upload to temp host, skipping social webhook video link:", e.message);
     }
+
+    // 3. انتشار در یوتیوب (تایید شده و فعال)
+    if (process.env.YOUTUBE_CLIENT_ID) {
+        try {
+            console.log("📺 Publishing to YouTube...");
+            await uploadToYouTube(title, description, tags);
+            console.log("✅ Published to YouTube successfully!");
+        } catch (e) {
+            console.error("❌ YouTube publishing failed:", e.message);
+        }
+    }
+
+    // 4. ارسال اطلاعات به Make.com (برای اینستاگرام و دریافت لینک تیک‌تاک)
+    if (process.env.MAKE_WEBHOOK_URL) {
+        try {
+            console.log("🔗 Sending payload to Make.com webhook...");
+            await axios.post(process.env.MAKE_WEBHOOK_URL, {
+                title: title,
+                description: description,
+                audio_url: audioUrl,
+                video_url: verticalVideoUrl,
+                tags: tags
+            });
+            console.log("✅ Webhook triggered successfully for Instagram & TikTok notifications!");
+        } catch (e) {
+            console.error("❌ Make.com webhook failed:", e.message);
+        }
+    }
+
+    console.log("🎉 All publishing tasks completed!");
 }
 
-run().catch(err => {
-    console.error(err);
+async function uploadToYouTube(title, description, tags) {
+    const oauth2Client = new google.auth.OAuth2(
+        process.env.YOUTUBE_CLIENT_ID,
+        process.env.YOUTUBE_CLIENT_SECRET,
+        'https://developers.google.com/oauthplayground'
+    );
+    oauth2Client.setCredentials({ refresh_token: process.env.YOUTUBE_REFRESH_TOKEN });
+
+    const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
+    await youtube.videos.insert({
+        part: 'snippet,status',
+        requestBody: {
+            snippet: {
+                title: title.substring(0, 100),
+                description: description,
+                tags: tags,
+                categoryId: '22' // People & Blogs
+            },
+            status: {
+                privacyStatus: 'public'
+            }
+        },
+        media: {
+            body: fs.createReadStream('output.mp4')
+        }
+    });
+}
+
+main().catch(err => {
+    console.error("❌ Fatal Error:", err);
     process.exit(1);
 });
