@@ -1,11 +1,10 @@
 {
   "podcastId": "zarebin",
-  "title": "تست تیک تاک",
-  "description": "توضیحات",
+  "title": "title",
+  "description": "description",
   "tags": [
-    "تگ",
-    "تک",
-    "دوم"
+    "first_tag",
+    "second_tag"
   ],
   "categoryName": "",
   "publishAt": null,
@@ -21,5 +20,5 @@
     "instagram": false,
     "tiktok": false
   },
-  "timestamp": 1792262356923
+  "timestamp": 1792266345527
 }
