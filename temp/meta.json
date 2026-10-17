@@ -1,11 +1,12 @@
 {
   "podcastId": "zarebin",
-  "title": "تست شنبه دوم",
-  "description": "تست شنبه دوم",
+  "title": "تست عنوان",
+  "description": "توصیحات",
   "tags": [
-    "تگ"
+    "تگ",
+    "اول"
   ],
-  "categoryName": "دسته بندی",
+  "categoryName": "",
   "publishAt": null,
   "platforms": {
     "youtube": false,
@@ -17,5 +18,5 @@
     "spotify": false,
     "instagram": false
   },
-  "timestamp": 1792272830180
+  "timestamp": 1792273393166
 }
