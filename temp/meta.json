@@ -1,24 +1,21 @@
 {
   "podcastId": "zarebin",
   "title": "تست",
-  "description": "تست توضیح",
+  "description": "تست",
   "tags": [
-    "تگ",
     "تگ"
   ],
   "categoryName": "",
   "publishAt": null,
   "platforms": {
-    "youtube": true,
+    "youtube": false,
     "spotify": true,
-    "instagram": true,
-    "tiktok": true
+    "instagram": false
   },
   "done": {
     "youtube": false,
     "spotify": false,
-    "instagram": false,
-    "tiktok": false
+    "instagram": false
   },
-  "timestamp": 1792272017877
+  "timestamp": 1792272315111
 }
