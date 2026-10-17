@@ -1,19 +1,19 @@
 {
   "podcastId": "zarebin",
-  "title": "تست دوم جمغع",
-  "description": "توضیح تست دوم",
+  "title": "تست تیک تاک",
+  "description": "توضیحات",
   "tags": [
-    "توضیح",
-    "تست",
+    "تگ",
+    "تک",
     "دوم"
   ],
   "categoryName": "",
   "publishAt": null,
   "platforms": {
-    "youtube": true,
-    "spotify": true,
-    "instagram": true,
-    "tiktok": false
+    "youtube": false,
+    "spotify": false,
+    "instagram": false,
+    "tiktok": true
   },
   "done": {
     "youtube": false,
@@ -21,5 +21,5 @@
     "instagram": false,
     "tiktok": false
   },
-  "timestamp": 1792180652424
+  "timestamp": 1792262356923
 }
