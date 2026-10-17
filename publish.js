@@ -92,8 +92,10 @@ async function run() {
         console.log("Generating 9:16 vertical video compatible with Instagram Reels & TikTok...");
         const vertCmd = 'ffmpeg -y -loop 1 -framerate 30 -i temp/vertical.jpg -i temp/audio.mp3 -c:v libx264 -tune stillimage -preset veryfast -crf 28 -r 30 -g 60 -c:a aac -b:a 128k -ar 44100 -ac 2 -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -movflags +faststart -shortest vertical.mp4';
         execSync(vertCmd, { stdio: 'inherit' });
+    }
 
-        console.log("Uploading vertical video to Catbox for direct non-redirect URL...");
+    if (platforms.instagram && !done.instagram && fs.existsSync('vertical.mp4')) {
+        console.log("Uploading vertical video to Catbox for Instagram Reels...");
         try {
             const uploadCmd = `curl -s --fail -F "reqtype=fileupload" -F "fileToUpload=@vertical.mp4" https://catbox.moe/user/api.php`;
             let directVideoUrl = execSync(uploadCmd).toString().trim();
@@ -115,16 +117,24 @@ async function run() {
                 podcast_id: podcastId,
                 title: title,
                 caption: fullCaption,
-                video_url: directVideoUrl,
-                instagram: Boolean(platforms.instagram && !done.instagram),
-                tiktok: Boolean(platforms.tiktok && !done.tiktok)
+                video_url: directVideoUrl
             });
 
-            if (platforms.instagram) done.instagram = true;
-            if (platforms.tiktok) done.tiktok = true;
-            console.log("Make.com webhook triggered successfully.");
+            done.instagram = true;
+            console.log("Make.com webhook triggered successfully for Instagram.");
         } catch (err) {
-            console.error("Error in Make.com / Video publishing:", err.response?.data || err.message);
+            console.error("Error in Instagram publishing:", err.response?.data || err.message);
+        }
+    }
+
+    if (platforms.tiktok && !done.tiktok && fs.existsSync('vertical.mp4')) {
+        console.log("Uploading vertical video to TikTok...");
+        try {
+            await uploadToTikTok(title, description, tags);
+            done.tiktok = true;
+            console.log("TikTok upload completed successfully.");
+        } catch (tikErr) {
+            console.error("TikTok upload error:", tikErr.response?.data || tikErr.message);
         }
     }
 
@@ -196,6 +206,77 @@ async function run() {
     }
 
     fs.writeFileSync('temp/completed.flag', 'done');
+}
+
+async function uploadToTikTok(title, description, tags) {
+    const clientKey = process.env.TIKTOK_CLIENT_KEY;
+    const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
+    const refreshToken = process.env.TIKTOK_REFRESH_TOKEN;
+
+    if (!clientKey || !clientSecret || !refreshToken) {
+        throw new Error("TikTok credentials or refresh token are missing in GitHub Secrets.");
+    }
+
+    console.log("Refreshing TikTok Access Token...");
+    const tokenRes = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', new URLSearchParams({
+        client_key: clientKey,
+        client_secret: clientSecret,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken
+    }), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+
+    const accessToken = tokenRes.data.data?.access_token || tokenRes.data.access_token;
+    if (!accessToken) {
+        throw new Error("Access token not found in TikTok response: " + JSON.stringify(tokenRes.data));
+    }
+
+    const stats = fs.statSync('vertical.mp4');
+    const videoSize = stats.size;
+    const hashtags = tags && tags.length > 0 ? ' ' + tags.map(t => t.startsWith('#') ? t : `#${t.replace(/\s+/g, '_')}`).join(' ') : '';
+    const fullTitle = `${title} - ${description}${hashtags}`.substring(0, 150);
+
+    console.log(`Initializing TikTok upload (${videoSize} bytes)...`);
+    const initRes = await axios.post('https://open.tiktokapis.com/v2/post/publish/video/init/', {
+        post_info: {
+            title: fullTitle,
+            privacy_level: "SELF_ONLY",
+            disable_duet: false,
+            disable_comment: false,
+            disable_stitch: false
+        },
+        source_info: {
+            source: "FILE_UPLOAD",
+            video_size: videoSize,
+            chunk_size: videoSize,
+            total_chunk_count: 1
+        }
+    }, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json; charset=UTF-8'
+        }
+    });
+
+    const uploadUrl = initRes.data?.data?.upload_url;
+    if (!uploadUrl) {
+        throw new Error("Failed to get TikTok upload_url: " + JSON.stringify(initRes.data));
+    }
+
+    console.log("Uploading video binary stream to TikTok server...");
+    const videoBuffer = fs.readFileSync('vertical.mp4');
+    await axios.put(uploadUrl, videoBuffer, {
+        headers: {
+            'Content-Type': 'video/mp4',
+            'Content-Length': videoSize,
+            'Content-Range': `bytes 0-${videoSize - 1}/${videoSize}`
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
+    });
+
+    console.log("Video binary uploaded to TikTok successfully!");
 }
 
 async function handleYouTubePlaylist(youtube, videoId, playlistTitle) {
