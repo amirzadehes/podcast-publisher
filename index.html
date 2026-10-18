@@ -163,28 +163,33 @@
         statusDiv.style.color = '#76d7c4';
         statusDiv.innerText = 'در حال ارسال فایل‌ها به سرور ابری... لطفاً صبر کنید.';
 
+        const jobId = `job_${Date.now()}`;
+        const jobFolder = `jobs/${jobId}`;
+
         try {
             const audioB64 = await fileToBase64(audioFile);
-            await sendToGitHub(token, audioB64, 'temp/audio.mp3');
+            await sendToGitHub(token, audioB64, `${jobFolder}/audio.mp3`);
 
             if (imgHorizontal) {
                 const hB64 = await fileToBase64(imgHorizontal);
-                await sendToGitHub(token, hB64, 'temp/horizontal.jpg');
+                await sendToGitHub(token, hB64, `${jobFolder}/horizontal.jpg`);
             }
 
             if (imgVertical) {
                 const vB64 = await fileToBase64(imgVertical);
-                await sendToGitHub(token, vB64, 'temp/vertical.jpg');
+                await sendToGitHub(token, vB64, `${jobFolder}/vertical.jpg`);
             }
 
             if (imgSquare) {
                 const sB64 = await fileToBase64(imgSquare);
-                await sendToGitHub(token, sB64, 'temp/square.jpg');
+                await sendToGitHub(token, sB64, `${jobFolder}/square.jpg`);
             }
 
             const tagsArray = tagsInput ? tagsInput.split(/\s+/).filter(Boolean) : [];
             const metaData = {
+                jobId: jobId,
                 podcastId: "zarebin",
+                status: "pending",
                 title: title,
                 description: description,
                 tags: tagsArray,
@@ -204,12 +209,12 @@
             };
 
             const metaB64 = btoa(unescape(encodeURIComponent(JSON.stringify(metaData, null, 2))));
-            await sendToGitHub(token, metaB64, 'temp/meta.json');
+            await sendToGitHub(token, metaB64, `${jobFolder}/meta.json`);
 
             await triggerWorkflow(token);
 
             statusDiv.style.color = '#2ecc71';
-            statusDiv.innerText = '✅ تمام فایل‌ها ارسال شد! سرور ابری در حال ساخت ویدیو و انتشار در پلتفرم‌ها است.';
+            statusDiv.innerText = '✅ تمام فایل‌ها در صف اختصاصی قرار گرفت! سرور ابری در حال پردازش است.';
         } catch (error) {
             statusDiv.style.color = '#e74c3c';
             statusDiv.innerText = '❌ خطا: ' + error.message;
@@ -233,7 +238,7 @@
         }
 
         const body = {
-            message: `Update ${path}`,
+            message: `Add/Update ${path}`,
             content: base64Content,
             branch: branch
         };
