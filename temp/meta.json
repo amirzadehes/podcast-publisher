@@ -1,11 +1,11 @@
 {
   "podcastId": "zarebin",
-  "title": "تست سوم یکشنبه",
-  "description": "توضیحات",
+  "title": "۹۴۲",
+  "description": "توضیحات ۹۴۲",
   "tags": [
-    "تگ"
+    "تگ۹۴۲"
   ],
-  "categoryName": "دسته بندی سوم",
+  "categoryName": "دسته ۹۴۲",
   "publishAt": null,
   "platforms": {
     "youtube": true,
@@ -17,5 +17,5 @@
     "spotify": false,
     "instagram": false
   },
-  "timestamp": 1792306326141
+  "timestamp": 1792309492478
 }
