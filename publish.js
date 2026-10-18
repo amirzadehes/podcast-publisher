@@ -55,7 +55,7 @@ async function processJob(jobDir) {
         } else {
             const vertVideoPath = path.join(jobDir, 'vertical.mp4');
             console.log(`🎬 Generating 9:16 vertical video for Archive.org (${title})...`);
-            execSync(`ffmpeg -loop 1 -framerate 30 -i "${verticalPath}" -i "${audioPath}" -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -c:v libx264 -preset fast -tune stillimage -r 30 -c:a aac -b:a 192k -ar 44100 -ac 2 -movflags +faststart -shortest "${vertVideoPath}" -y`);
+            execSync(`ffmpeg -loop 1 -framerate 2 -i "${verticalPath}" -i "${audioPath}" -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -c:v libx264 -preset veryfast -tune stillimage -crf 28 -maxrate 500k -bufsize 1000k -r 24 -g 240 -c:a aac -b:a 128k -ar 44100 -ac 2 -movflags +faststart -shortest "${vertVideoPath}" -y`);
 
             if (iaAccess && iaSecret) {
                 try {
