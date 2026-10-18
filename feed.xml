@@ -21,6 +21,14 @@
 		<itunes:category text="Science"/>
 		<itunes:image href="https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_nologo/46831955/46831955-1791735308997-ce8ded9d59d5a.jpg"/>
 		                                                                                                                                                                                <item>
+      <title><![CDATA[تست سوم یکشنبه]]></title>
+      <description><![CDATA[توضیحات]]></description>
+      <enclosure url="https://archive.org/download/podcast-1792307977660/audio.mp3" length="2762283" type="audio/mpeg"/>
+      <guid isPermaLink="false">ep-1792308082726</guid>
+      <pubDate>Sun, 18 Oct 2026 07:21:22 GMT</pubDate>
+      <itunes:image href="https://archive.org/download/podcast-1792307977660/square.jpg"/>
+    </item>
+    <item>
       <title><![CDATA[تست دوم جمغع]]></title>
       <description><![CDATA[توضیح تست دوم]]></description>
       <enclosure url="https://archive.org/download/zarrebin-podcast-1792180652424/ep_1792180652424.mp3" length="2762283" type="audio/mpeg" />
