@@ -1,15 +1,15 @@
 {
   "podcastId": "zarebin",
-  "title": "تست دوم یکشنبه",
+  "title": "تست سوم یکشنبه",
   "description": "توضیحات",
   "tags": [
     "تگ"
   ],
-  "categoryName": "",
+  "categoryName": "دسته بندی سوم",
   "publishAt": null,
   "platforms": {
-    "youtube": false,
-    "spotify": false,
+    "youtube": true,
+    "spotify": true,
     "instagram": true
   },
   "done": {
@@ -17,5 +17,5 @@
     "spotify": false,
     "instagram": false
   },
-  "timestamp": 1792305266906
+  "timestamp": 1792306326141
 }
