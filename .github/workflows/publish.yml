@@ -3,6 +3,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '*/15 * * * *'
+concurrency:
+  group: podcast-publishing-queue
+  cancel-in-progress: false
 permissions:
   contents: write
 jobs:
@@ -10,21 +13,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check Temp Folder
-        id: check_temp
+      - name: Check Pending Jobs
+        id: check_jobs
         run: |
-          if [ -f "temp/meta.json" ]; then
+          if [ -f "temp/meta.json" ] || [ -n "$(find jobs -name 'meta.json' 2>/dev/null)" ]; then
             echo "has_job=true" >> $GITHUB_OUTPUT
           else
             echo "has_job=false" >> $GITHUB_OUTPUT
           fi
       - name: Install Dependencies and FFmpeg
-        if: steps.check_temp.outputs.has_job == 'true'
+        if: steps.check_jobs.outputs.has_job == 'true'
         run: |
           sudo apt-get update && sudo apt-get install -y ffmpeg curl
           npm install googleapis@latest axios form-data
       - name: Process and Publish
-        if: steps.check_temp.outputs.has_job == 'true'
+        if: steps.check_jobs.outputs.has_job == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IA_ACCESS_KEY: ${{ secrets.IA_ACCESS_KEY }}
@@ -34,16 +37,12 @@ jobs:
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
         run: node publish.js
-      - name: Update Feed and Clean Temp
-        if: steps.check_temp.outputs.has_job == 'true'
+      - name: Update Feed and Clean Completed Jobs
+        if: steps.check_jobs.outputs.has_job == 'true'
         run: |
           git config user.name "PodcastBot"
           git config user.email "bot@users.noreply.github.com"
-          if [ -f "temp/completed.flag" ]; then
-            git rm -rf temp episodes || true
-          else
-            git add temp/meta.json || true
-          fi
-          git add feed.xml || true
-          git commit -m "Publish episode via Archive.org and clean repo" || true
+          git pull --rebase origin main || true
+          git add -A
+          git commit -m "Process podcast queue and clean up completed jobs" || true
           git push
