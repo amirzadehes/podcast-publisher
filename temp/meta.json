@@ -1,9 +1,9 @@
 {
   "podcastId": "zarebin",
-  "title": "بکشنبه اولین تست",
-  "description": "توصبحتن توتت",
+  "title": "تست دوم یکشنبه",
+  "description": "توضیحات",
   "tags": [
-    "تگها"
+    "تگ"
   ],
   "categoryName": "",
   "publishAt": null,
@@ -17,5 +17,5 @@
     "spotify": false,
     "instagram": false
   },
-  "timestamp": 1792304158638
+  "timestamp": 1792305266906
 }
