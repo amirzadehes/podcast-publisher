@@ -1,7 +1,6 @@
 const fs = require('fs');
 const axios = require('axios');
 const { google } = require('googleapis');
-const FormData = require('form-data');
 
 async function main() {
     console.log("🚀 Starting podcast publishing pipeline...");
@@ -11,13 +10,11 @@ async function main() {
     const tagsEnv = process.env.EPISODE_TAGS || "";
     const tags = tagsEnv.split(',').map(t => t.trim()).filter(Boolean);
 
-    // بررسی وجود فایل صوتی محلی که از طریق سایت آپلود شده است
     if (!fs.existsSync('temp/audio.mp3')) {
         throw new Error("❌ Local audio file (temp/audio.mp3) is missing!");
     }
 
-    console.log("📥 Using local audio and cover assets...");
-    // کپی کردن فایل‌ها به مسیر اصلی برای کار با FFmpeg
+    console.log("📥 Preparing audio and image assets...");
     fs.copyFileSync('temp/audio.mp3', 'audio.mp3');
 
     if (fs.existsSync('temp/vertical.jpg')) {
@@ -36,31 +33,46 @@ async function main() {
     try {
         execSync('ffmpeg -loop 1 -i cover.jpg -i audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -shortest output.mp4 -y');
     } catch (e) {
-        console.log("⚠️ Horizontal video creation skipped or failed:", e.message);
+        console.log("⚠️ Horizontal video creation skipped:", e.message);
     }
 
-    // ساخت ویدیوی عمودی برای اینستاگرام و تیک‌تاک
+    // ساخت ویدیوی عمودی برای اینستاگرام و تلگرام
     try {
         execSync('ffmpeg -loop 1 -i cover.jpg -i audio.mp3 -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -shortest vertical.mp4 -y');
     } catch (e) {
-        console.log("⚠️ Vertical video creation skipped or failed:", e.message);
+        console.log("⚠️ Vertical video creation skipped:", e.message);
     }
 
-    // آپلود ویدیو در یک هاست موقت برای دسترسی Make.com (جهت اینستاگرام و تلگرام)
+    // آپلود روی Archive.org
     let verticalVideoUrl = "";
-    if (fs.existsSync('vertical.mp4')) {
+    const itemIdentifier = `podcast-${Date.now()}`;
+    const iaAccess = process.env.IA_ACCESS_KEY;
+    const iaSecret = process.env.IA_SECRET_KEY;
+
+    if (fs.existsSync('vertical.mp4') && iaAccess && iaSecret) {
         try {
-            console.log("☁️ Uploading vertical video to temporary host for social media...");
-            const form = new FormData();
-            form.append('reqtype', 'fileupload');
-            form.append('fileToUpload', fs.createReadStream('vertical.mp4'));
-            const catboxRes = await axios.post('https://catbox.moe/user/api.php', form, {
-                headers: form.getHeaders()
+            console.log(`🏛️ Uploading vertical video to Archive.org (${itemIdentifier})...`);
+            const videoStream = fs.createReadStream('vertical.mp4');
+            const videoSize = fs.statSync('vertical.mp4').size;
+
+            await axios.put(`https://s3.us.archive.org/${itemIdentifier}/vertical.mp4`, videoStream, {
+                headers: {
+                    'Authorization': `LOW ${iaAccess}:${iaSecret}`,
+                    'x-archive-auto-make-bucket': '1',
+                    'x-archive-meta-mediatype': 'movies',
+                    'x-archive-meta-collection': 'opensource_movies',
+                    'x-archive-meta-title': title,
+                    'x-archive-meta-creator': 'amir_hosseinzadeh843',
+                    'Content-Length': videoSize
+                },
+                maxBodyLength: Infinity,
+                maxContentLength: Infinity
             });
-            verticalVideoUrl = catboxRes.data;
-            console.log("✅ Vertical video uploaded successfully:", verticalVideoUrl);
+
+            verticalVideoUrl = `https://archive.org/download/${itemIdentifier}/vertical.mp4`;
+            console.log("✅ Vertical video uploaded to Archive.org:", verticalVideoUrl);
         } catch (e) {
-            console.log("⚠️ Could not upload to temp host, skipping social webhook video link:", e.message);
+            console.error("❌ Archive.org upload failed:", e.response ? e.response.data : e.message);
         }
     }
 
@@ -75,14 +87,14 @@ async function main() {
         }
     }
 
-    // ارسال اطلاعات به Make.com (برای اینستاگرام و دریافت لینک تلگرام)
+    // ارسال به Make.com (اینستاگرام و تلگرام)
     if (process.env.MAKE_WEBHOOK_URL) {
         try {
             console.log("🔗 Sending payload to Make.com webhook...");
             await axios.post(process.env.MAKE_WEBHOOK_URL, {
                 title: title,
                 description: description,
-                audio_url: "https://raw.githubusercontent.com/amirzadehes/podcast-publisher/main/temp/audio.mp3",
+                audio_url: `https://archive.org/download/${itemIdentifier}/audio.mp3`,
                 video_url: verticalVideoUrl,
                 tags: tags
             });
