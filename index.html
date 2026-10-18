@@ -12,7 +12,7 @@
         input[type="text"], input[type="password"], input[type="datetime-local"], textarea { width: 100%; padding: 10px; margin-top: 5px; background: #2d2d2d; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; font-family: Tahoma, sans-serif; }
         input:focus, textarea:focus { border-color: #0d6efd; outline: none; }
         input[type="file"] { width: 100%; padding: 8px; margin-top: 5px; background: #252525; border: 1px solid #444; color: #bbb; border-radius: 6px; cursor: pointer; box-sizing: border-box; }
-        .platforms { background: #252525; padding: 15px; border-radius: 6px; margin-top: 10px; border: 1px solid #383838; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .platforms { background: #252525; padding: 15px; border-radius: 6px; margin-top: 10px; border: 1px solid #383838; display: flex; flex-direction: column; gap: 12px; }
         .platforms label { margin-top: 0; font-weight: normal; color: #e0e0e0; cursor: pointer; display: flex; align-items: center; }
         .platforms input[type="checkbox"] { margin-left: 8px; transform: scale(1.2); cursor: pointer; }
         button { width: 100%; background: #0d6efd; color: white; border: none; padding: 14px; margin-top: 25px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; font-family: Tahoma, sans-serif; }
@@ -23,8 +23,11 @@
         #status, #editStatus { margin-top: 15px; text-align: center; font-weight: bold; line-height: 1.6; }
         .ep-item { background: #262626; border: 1px solid #444; padding: 15px; border-radius: 8px; margin-top: 15px; }
         .ep-item input, .ep-item textarea { margin-bottom: 10px; }
-        .ep-save-btn { background: #ffc107; color: #000; padding: 10px; margin-top: 5px; font-size: 14px; }
+        .ep-actions { display: flex; gap: 10px; margin-top: 5px; }
+        .ep-save-btn { background: #ffc107; color: #000; padding: 10px; margin-top: 0; font-size: 14px; flex: 2; }
         .ep-save-btn:hover { background: #e0a800; }
+        .ep-delete-btn { background: #dc3545; color: #fff; padding: 10px; margin-top: 0; font-size: 14px; flex: 1; }
+        .ep-delete-btn:hover { background: #bb2d3b; }
         .search-box { display: none; margin-top: 15px; }
         .pagination { display: none; justify-content: space-between; align-items: center; gap: 10px; margin-top: 20px; background: #252525; padding: 10px 15px; border-radius: 8px; border: 1px solid #383838; }
         .pagination button { margin-top: 0; padding: 10px; font-size: 14px; width: 40%; background: #3b4252; }
@@ -46,32 +49,32 @@
     <label>توضیحات اپیزود:</label>
     <textarea id="description" rows="4" placeholder="توضیحات کامل اپیزود..."></textarea>
 
-    <label>تگ‌ها (با فاصله / Space از هم جدا کنید):</label>
+    <label>تگ‌ها</label>
     <input type="text" id="tags" placeholder="تگ_اول تگ_دوم تگ_سوم">
 
-    <label>دسته‌بندی / پلی‌لیست (در صورت نبودن، خودکار ساخته می‌شود):</label>
+    <label>پلی‌لیست</label>
     <input type="text" id="categoryName" placeholder="مثلاً: Studio 15 یا Katalog یا ذره‌بین">
 
-    <label>زمان انتشار (اختیاری - برای انتشار فوری خالی بگذارید):</label>
+    <label>زمان انتشار</label>
     <input type="datetime-local" id="publishAt">
 
     <label>فایل صوتی پادکست (MP3):</label>
     <input type="file" id="audioFile" accept="audio/*">
 
-    <label>عکس افقی ۱۶:۹ (مخصوص یوتیوب - 1920x1080):</label>
+    <label>یوتیوب</label>
     <input type="file" id="imgHorizontal" accept="image/*">
 
-    <label>عکس عمودی ۹:۱۶ (مخصوص اینستاگرام و تیک‌تاک - 1080x1920):</label>
+    <label>اینستاگرام</label>
     <input type="file" id="imgVertical" accept="image/*">
 
-    <label>عکس مربعی ۱:۱ (مخصوص کاور اسپاتیفای - 1080x1080):</label>
+    <label>اسپاتیفای</label>
     <input type="file" id="imgSquare" accept="image/*">
 
     <label>انتشار در پلتفرم‌های:</label>
     <div class="platforms">
-        <label><input type="checkbox" id="platYoutube" checked> یوتیوب (YouTube)</label>
-        <label><input type="checkbox" id="platSpotify" checked> اسپاتیفای (Spotify RSS)</label>
-        <label><input type="checkbox" id="platInstagram" checked> اینستاگرام (Instagram)</label>
+        <label><input type="checkbox" id="platYoutube" checked> YouTube</label>
+        <label><input type="checkbox" id="platSpotify" checked> Spotify</label>
+        <label><input type="checkbox" id="platInstagram" checked> Instagram</label>
     </div>
 
     <button onclick="publishEpisode()">ساخت ویدیو و انتشار</button>
@@ -80,7 +83,7 @@
 
 <div class="container">
     <h3>مدیریت و ویرایش اپیزودهای اسپاتیفای</h3>
-    <button class="btn-secondary" onclick="loadEpisodesForEdit()">نمایش لیست اپیزودها برای ویرایش عنوان / توضیحات</button>
+    <button class="btn-secondary" onclick="loadEpisodesForEdit()">نمایش لیست اپیزودها برای ویرایش / حذف</button>
     
     <div id="searchContainer" class="search-box">
         <input type="text" id="searchInput" placeholder="🔍 جستجو در عنوان یا توضیحات اپیزودها..." oninput="handleSearch()">
@@ -140,12 +143,12 @@
         }
 
         if (platYoutube && !imgHorizontal) {
-            alert('برای انتشار در یوتیوب، لطفاً عکس افقی (۱۶:۹) را انتخاب کنید.');
+            alert('برای انتشار در یوتیوب، لطفاً عکس یوتیوب را انتخاب کنید.');
             return;
         }
 
         if (platInstagram && !imgVertical) {
-            alert('برای انتشار در اینستاگرام، لطفاً عکس عمودی (۹:۱۶) را انتخاب کنید.');
+            alert('برای انتشار در اینستاگرام، لطفاً عکس اینستاگرام را انتخاب کنید.');
             return;
         }
 
@@ -281,6 +284,23 @@
     let currentPage = 1;
     const pageSize = 5;
 
+    function parseEpisodesFromXml(xmlString) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+        const items = xmlDoc.getElementsByTagName("item");
+        const list = [];
+        for (let i = 0; i < items.length; i++) {
+            const titleNode = items[i].getElementsByTagName("title")[0];
+            const descNode = items[i].getElementsByTagName("description")[0];
+            list.push({
+                originalIndex: i,
+                title: titleNode ? titleNode.textContent : '',
+                description: descNode ? descNode.textContent : ''
+            });
+        }
+        return list;
+    }
+
     async function loadEpisodesForEdit() {
         const token = document.getElementById('ghToken').value.trim();
         const editStatus = document.getElementById('editStatus');
@@ -312,24 +332,11 @@
             const data = await res.json();
             currentFeedXml = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
 
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(currentFeedXml, "text/xml");
-            const items = xmlDoc.getElementsByTagName("item");
+            allEpisodes = parseEpisodesFromXml(currentFeedXml);
 
-            if (items.length === 0) {
+            if (allEpisodes.length === 0) {
                 editStatus.innerText = 'هیچ اپیزودی در فید یافت نشد.';
                 return;
-            }
-
-            allEpisodes = [];
-            for (let i = 0; i < items.length; i++) {
-                const titleNode = items[i].getElementsByTagName("title")[0];
-                const descNode = items[i].getElementsByTagName("description")[0];
-                allEpisodes.push({
-                    originalIndex: i,
-                    title: titleNode ? titleNode.textContent : '',
-                    description: descNode ? descNode.textContent : ''
-                });
             }
 
             document.getElementById('searchInput').value = '';
@@ -354,7 +361,8 @@
                 ep.description.toLowerCase().includes(query)
             );
         }
-        currentPage = 1;
+        const totalPages = Math.ceil(filteredEpisodes.length / pageSize) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
         renderEpisodesPage();
     }
 
@@ -379,7 +387,7 @@
 
         if (filteredEpisodes.length === 0) {
             editStatus.style.color = '#ffc107';
-            editStatus.innerText = 'هیچ اپیزودی با این عبارت یافت نشد.';
+            editStatus.innerText = 'هیچ اپیزودی یافت نشد.';
             paginationContainer.style.display = 'none';
             return;
         }
@@ -400,7 +408,10 @@
                 <input type="text" id="edit_title_${idx}" value="${ep.title.replace(/"/g, '&quot;')}">
                 <label>توضیحات اپیزود ${idx + 1}:</label>
                 <textarea rows="3" id="edit_desc_${idx}">${ep.description.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-                <button class="ep-save-btn" onclick="saveEpisodeEdit(${idx})">ذخیره تغییرات این اپیزود در اسپاتیفای</button>
+                <div class="ep-actions">
+                    <button class="ep-save-btn" onclick="saveEpisodeEdit(${idx})">ذخیره تغییرات</button>
+                    <button class="ep-delete-btn" onclick="deleteEpisode(${idx})">حذف اپیزود</button>
+                </div>
             `;
             listDiv.appendChild(itemBox);
         });
@@ -450,6 +461,43 @@
         } catch (err) {
             editStatus.style.color = '#e74c3c';
             editStatus.innerText = '❌ خطا در ذخیره تغییرات: ' + err.message;
+        }
+    }
+
+    async function deleteEpisode(index) {
+        const ep = allEpisodes.find(e => e.originalIndex === index);
+        const epTitle = ep ? ep.title : `شماره ${index + 1}`;
+
+        if (!confirm(`آیا از حذف کامل اپیزود «${epTitle}» از فید اسپاتیفای مطمئن هستید؟`)) {
+            return;
+        }
+
+        const token = document.getElementById('ghToken').value.trim();
+        const editStatus = document.getElementById('editStatus');
+
+        editStatus.style.color = '#ffc107';
+        editStatus.innerText = 'در حال حذف اپیزود از فید اسپاتیفای...';
+
+        try {
+            let itemCounter = -1;
+            const updatedXml = currentFeedXml.replace(/\s*<item>[\s\S]*?<\/item>/g, (match) => {
+                itemCounter++;
+                if (itemCounter === index) return '';
+                return match;
+            });
+
+            const b64Xml = btoa(unescape(encodeURIComponent(updatedXml)));
+            await sendToGitHub(token, b64Xml, 'feed.xml');
+            currentFeedXml = updatedXml;
+
+            allEpisodes = parseEpisodesFromXml(currentFeedXml);
+            handleSearch();
+
+            editStatus.style.color = '#2ecc71';
+            editStatus.innerText = `✅ اپیزود «${epTitle}» با موفقیت از فید اسپاتیفای حذف شد!`;
+        } catch (err) {
+            editStatus.style.color = '#e74c3c';
+            editStatus.innerText = '❌ خطا در حذف اپیزود: ' + err.message;
         }
     }
 </script>
