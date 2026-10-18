@@ -1,0 +1,23 @@
+{
+  "jobId": "job_1792327906288",
+  "podcastId": "zarebin",
+  "status": "pending",
+  "title": "راز ستاره میشلین",
+  "description": "توضیحات رستوران میشلین",
+  "tags": [
+    "تگ_اول"
+  ],
+  "categoryName": "پلی لیست",
+  "publishAt": null,
+  "platforms": {
+    "youtube": true,
+    "spotify": true,
+    "instagram": true
+  },
+  "done": {
+    "youtube": false,
+    "spotify": false,
+    "instagram": false
+  },
+  "timestamp": 1792327921122
+}
