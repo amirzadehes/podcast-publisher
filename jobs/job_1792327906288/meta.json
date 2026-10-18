@@ -15,9 +15,14 @@
     "instagram": true
   },
   "done": {
-    "youtube": false,
-    "spotify": false,
+    "youtube": true,
+    "spotify": true,
     "instagram": false
   },
-  "timestamp": 1792327921122
+  "timestamp": 1792327921122,
+  "itemIdentifier": "podcast-1792327921122",
+  "archiveAudioUrl": "https://archive.org/download/podcast-1792327921122/audio.mp3",
+  "archiveSquareUrl": "https://archive.org/download/podcast-1792327921122/square.jpg",
+  "verticalVideoUrl": "https://archive.org/download/podcast-1792327921122/vertical.mp4",
+  "verticalUploadedAt": 1792328395406
 }
