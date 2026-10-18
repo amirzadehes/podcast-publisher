@@ -1,0 +1,23 @@
+{
+  "jobId": "job_1792350239530",
+  "podcastId": "zarebin",
+  "status": "pending",
+  "title": "۲۱۰۳",
+  "description": "توضیحات ۲۱۰۳",
+  "tags": [
+    "تگ"
+  ],
+  "categoryName": "",
+  "publishAt": null,
+  "platforms": {
+    "youtube": true,
+    "spotify": true,
+    "instagram": true
+  },
+  "done": {
+    "youtube": false,
+    "spotify": false,
+    "instagram": false
+  },
+  "timestamp": 1792350248302
+}
