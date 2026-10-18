@@ -1,0 +1,26 @@
+{
+  "jobId": "job_1792311694743",
+  "podcastId": "zarebin",
+  "status": "pending",
+  "title": "1019",
+  "description": "توضیحات ۱۰۱۹",
+  "tags": [
+    "تگ",
+    "اول.",
+    "تک",
+    "دوم"
+  ],
+  "categoryName": "دسته‌بندی ۱۰۱۹",
+  "publishAt": null,
+  "platforms": {
+    "youtube": true,
+    "spotify": true,
+    "instagram": true
+  },
+  "done": {
+    "youtube": false,
+    "spotify": false,
+    "instagram": false
+  },
+  "timestamp": 1792311712422
+}
