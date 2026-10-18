@@ -5,11 +5,24 @@ const { google } = require('googleapis');
 async function main() {
     console.log("🚀 Starting podcast publishing pipeline...");
 
-    const title = process.env.EPISODE_TITLE || "New Episode";
-    const description = process.env.EPISODE_DESCRIPTION || "";
-    const tagsEnv = process.env.EPISODE_TAGS || "";
-    const tags = tagsEnv.split(',').map(t => t.trim()).filter(Boolean);
+    // ۱. استخراج اطلاعات از فایل temp/meta.json
+    let title = "New Episode";
+    let description = "";
+    let tags = [];
 
+    if (fs.existsSync('temp/meta.json')) {
+        try {
+            const meta = JSON.parse(fs.readFileSync('temp/meta.json', 'utf8'));
+            title = meta.title || title;
+            description = meta.description || description;
+            tags = meta.tags || [];
+            console.log(`📋 Metadata loaded: "${title}"`);
+        } catch (e) {
+            console.log("⚠️ Could not parse temp/meta.json:", e.message);
+        }
+    }
+
+    // ۲. بررسی فایل صوتی
     if (!fs.existsSync('temp/audio.mp3')) {
         throw new Error("❌ Local audio file (temp/audio.mp3) is missing!");
     }
@@ -25,7 +38,7 @@ async function main() {
         fs.writeFileSync('cover.jpg', Buffer.alloc(0));
     }
 
-    // ساخت ویدیوها با FFmpeg
+    // ۳. رندر ویدیوها با FFmpeg
     console.log("🎬 Generating videos using FFmpeg...");
     const { execSync } = require('child_process');
     
@@ -33,23 +46,25 @@ async function main() {
     try {
         execSync('ffmpeg -loop 1 -i cover.jpg -i audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -shortest output.mp4 -y');
     } catch (e) {
-        console.log("⚠️ Horizontal video creation skipped:", e.message);
+        console.log("⚠️ Horizontal video skipped:", e.message);
     }
 
-    // ساخت ویدیوی عمودی برای اینستاگرام و تلگرام
+    // ساخت ویدیوی عمودی برای تلگرام و شبکه‌های اجتماعی
     try {
         execSync('ffmpeg -loop 1 -i cover.jpg -i audio.mp3 -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -shortest vertical.mp4 -y');
     } catch (e) {
-        console.log("⚠️ Vertical video creation skipped:", e.message);
+        console.log("⚠️ Vertical video skipped:", e.message);
     }
 
-    // آپلود روی Archive.org
+    // ۴. آپلود ویدیوی عمودی در Archive.org
     let verticalVideoUrl = "";
     const itemIdentifier = `podcast-${Date.now()}`;
     const iaAccess = process.env.IA_ACCESS_KEY;
     const iaSecret = process.env.IA_SECRET_KEY;
 
-    if (fs.existsSync('vertical.mp4') && iaAccess && iaSecret) {
+    if (!iaAccess || !iaSecret) {
+        console.log("⚠️ IA_ACCESS_KEY or IA_SECRET_KEY is missing in environment variables!");
+    } else if (fs.existsSync('vertical.mp4')) {
         try {
             console.log(`🏛️ Uploading vertical video to Archive.org (${itemIdentifier})...`);
             const videoStream = fs.createReadStream('vertical.mp4');
@@ -76,22 +91,31 @@ async function main() {
         }
     }
 
-    // انتشار در یوتیوب
-    if (process.env.YOUTUBE_CLIENT_ID && fs.existsSync('output.mp4')) {
+    // ۵. آپلود در یوتیوب با متغیرهای اختصاصی مخزن
+    const ytClientId = process.env.YT_CLIENT_ID;
+    const ytClientSecret = process.env.YT_CLIENT_SECRET;
+    const ytRefreshToken = process.env.YT_REFRESH_TOKEN;
+
+    if (ytClientId && ytClientSecret && ytRefreshToken && fs.existsSync('output.mp4')) {
         try {
             console.log("📺 Publishing to YouTube...");
-            await uploadToYouTube(title, description, tags);
+            await uploadToYouTube(ytClientId, ytClientSecret, ytRefreshToken, title, description, tags);
             console.log("✅ Published to YouTube successfully!");
         } catch (e) {
             console.error("❌ YouTube publishing failed:", e.message);
         }
+    } else {
+        console.log("⚠️ YouTube credentials missing or output.mp4 not found, skipping YouTube.");
     }
 
-    // ارسال به Make.com (اینستاگرام و تلگرام)
-    if (process.env.MAKE_WEBHOOK_URL) {
+    // ۶. فراخوانی وب‌هوک Make.com برای تلگرام و اینستاگرام
+    const makeWebhook = process.env.MAKE_WEBHOOK_URL;
+    if (!makeWebhook) {
+        console.log("⚠️ MAKE_WEBHOOK_URL is missing! Please add it to repository secrets.");
+    } else {
         try {
             console.log("🔗 Sending payload to Make.com webhook...");
-            await axios.post(process.env.MAKE_WEBHOOK_URL, {
+            await axios.post(makeWebhook, {
                 title: title,
                 description: description,
                 audio_url: `https://archive.org/download/${itemIdentifier}/audio.mp3`,
@@ -104,16 +128,17 @@ async function main() {
         }
     }
 
+    fs.writeFileSync('temp/completed.flag', 'done');
     console.log("🎉 All publishing tasks completed!");
 }
 
-async function uploadToYouTube(title, description, tags) {
+async function uploadToYouTube(clientId, clientSecret, refreshToken, title, description, tags) {
     const oauth2Client = new google.auth.OAuth2(
-        process.env.YOUTUBE_CLIENT_ID,
-        process.env.YOUTUBE_CLIENT_SECRET,
+        clientId,
+        clientSecret,
         'https://developers.google.com/oauthplayground'
     );
-    oauth2Client.setCredentials({ refresh_token: process.env.YOUTUBE_REFRESH_TOKEN });
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
 
     const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
     await youtube.videos.insert({
