@@ -27,14 +27,12 @@ jobs:
         if: steps.check_temp.outputs.has_job == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IA_ACCESS_KEY: ${{ secrets.IA_ACCESS_KEY }}
+          IA_SECRET_KEY: ${{ secrets.IA_SECRET_KEY }}
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
-          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
-          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
-          TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
-          IG_USER_ID: ${{ secrets.IG_USER_ID }}
-          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
         run: node publish.js
       - name: Update Feed and Clean Temp
         if: steps.check_temp.outputs.has_job == 'true'
