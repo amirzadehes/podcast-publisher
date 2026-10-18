@@ -31,14 +31,6 @@ async function processJob(jobDir) {
 
     const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
 
-    if (meta.publishAt) {
-        const publishTime = new Date(meta.publishAt).getTime();
-        if (Date.now() < publishTime) {
-            console.log(`⏳ Job in ${jobDir} is scheduled for ${meta.publishAt}. Skipping for now.`);
-            return;
-        }
-    }
-
     const title = meta.title || "New Episode";
     const description = meta.description || "";
     const tags = meta.tags || [];
@@ -52,19 +44,51 @@ async function processJob(jobDir) {
     const verticalPath = path.join(jobDir, 'vertical.jpg');
     const squarePath = path.join(jobDir, 'square.jpg');
 
-    const needsAudioFile =
-        (platforms.youtube && !meta.done.youtube) ||
-        (platforms.spotify && !meta.done.spotify) ||
-        (platforms.instagram && !meta.done.instagram && !meta.verticalVideoUrl);
-
-    if (needsAudioFile && !fs.existsSync(audioPath)) {
-        throw new Error(`❌ Audio file missing in ${jobDir}`);
-    }
-
     const itemIdentifier = meta.itemIdentifier || `podcast-${meta.timestamp || Date.now()}`;
     meta.itemIdentifier = itemIdentifier;
     const iaAccess = process.env.IA_ACCESS_KEY;
     const iaSecret = process.env.IA_SECRET_KEY;
+
+    if (platforms.instagram && !meta.done.instagram && !meta.verticalVideoUrl) {
+        if (!fs.existsSync(verticalPath) || !fs.existsSync(audioPath)) {
+            console.error(`❌ vertical.jpg or audio.mp3 is missing in ${jobDir} for Instagram/TikTok!`);
+        } else {
+            const vertVideoPath = path.join(jobDir, 'vertical.mp4');
+            console.log(`🎬 Generating 9:16 vertical video for Archive.org (${title})...`);
+            execSync(`ffmpeg -loop 1 -framerate 30 -i "${verticalPath}" -i "${audioPath}" -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -c:v libx264 -preset fast -tune stillimage -r 30 -c:a aac -b:a 192k -ar 44100 -ac 2 -movflags +faststart -shortest "${vertVideoPath}" -y`);
+
+            if (iaAccess && iaSecret) {
+                try {
+                    console.log("🏛️ Uploading 9:16 vertical video to Archive.org...");
+                    const uploadedUrl = await uploadToArchive(itemIdentifier, vertVideoPath, 'vertical.mp4', title, 'movies', 'opensource_movies', iaAccess, iaSecret);
+                    meta.verticalVideoUrl = uploadedUrl;
+                    meta.verticalUploadedAt = Date.now();
+                    fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
+                    console.log("✅ Vertical video uploaded to Archive.org:", uploadedUrl);
+                } catch (e) {
+                    console.error("❌ Vertical video Archive.org upload failed:", e.response ? e.response.data : e.message);
+                }
+            }
+
+            if (fs.existsSync(vertVideoPath)) fs.unlinkSync(vertVideoPath);
+        }
+    }
+
+    if (meta.publishAt) {
+        const publishTime = new Date(meta.publishAt).getTime();
+        if (Date.now() < publishTime) {
+            console.log(`⏳ Job in ${jobDir} is prepared on Archive.org and scheduled for ${meta.publishAt}. Waiting for publish time...`);
+            return;
+        }
+    }
+
+    const needsAudioFile =
+        (platforms.youtube && !meta.done.youtube) ||
+        (platforms.spotify && !meta.done.spotify);
+
+    if (needsAudioFile && !fs.existsSync(audioPath)) {
+        throw new Error(`❌ Audio file missing in ${jobDir}`);
+    }
 
     if (platforms.youtube && !meta.done.youtube) {
         if (!fs.existsSync(horizontalPath)) {
@@ -119,76 +143,61 @@ async function processJob(jobDir) {
         }
     }
 
-    if (platforms.instagram && !meta.done.instagram) {
-        if (!meta.verticalVideoUrl) {
-            if (!fs.existsSync(verticalPath)) {
-                console.error(`❌ vertical.jpg is missing in ${jobDir} for Instagram/TikTok!`);
-            } else {
-                const vertVideoPath = path.join(jobDir, 'vertical.mp4');
-                console.log(`🎬 Generating 9:16 vertical video for Instagram & TikTok (${title})...`);
-                execSync(`ffmpeg -loop 1 -framerate 30 -i "${verticalPath}" -i "${audioPath}" -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -c:v libx264 -preset fast -tune stillimage -r 30 -c:a aac -b:a 192k -ar 44100 -ac 2 -movflags +faststart -shortest "${vertVideoPath}" -y`);
+    if (platforms.instagram && !meta.done.instagram && meta.verticalVideoUrl) {
+        const waitDurationMs = 30 * 60 * 1000;
+        const elapsedMs = Date.now() - (meta.verticalUploadedAt || 0);
 
-                if (iaAccess && iaSecret) {
+        if (elapsedMs < waitDurationMs) {
+            const remainingMins = Math.ceil((waitDurationMs - elapsedMs) / 60000);
+            console.log(`⏳ Waiting 30 minutes from Archive.org upload time. (${remainingMins} minutes remaining before sending to Make.com)...`);
+        } else {
+            const makeWebhook = process.env.MAKE_WEBHOOK_URL;
+            if (makeWebhook) {
+                try {
+                    let directVideoUrl = meta.verticalVideoUrl;
                     try {
-                        console.log("🏛️ Uploading 9:16 vertical video to Archive.org...");
-                        const uploadedUrl = await uploadToArchive(itemIdentifier, vertVideoPath, 'vertical.mp4', title, 'movies', 'opensource_movies', iaAccess, iaSecret);
-                        meta.verticalVideoUrl = uploadedUrl;
-                        meta.verticalUploadedAt = Date.now();
-                        fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
-                        console.log("✅ Vertical video uploaded to Archive.org:", uploadedUrl);
-                    } catch (e) {
-                        console.error("❌ Vertical video Archive.org upload failed:", e.response ? e.response.data : e.message);
-                    }
-                }
-
-                if (fs.existsSync(vertVideoPath)) fs.unlinkSync(vertVideoPath);
-            }
-        }
-
-        if (meta.verticalVideoUrl) {
-            const waitDurationMs = 30 * 60 * 1000;
-            const elapsedMs = Date.now() - (meta.verticalUploadedAt || 0);
-
-            if (elapsedMs < waitDurationMs) {
-                const remainingMins = Math.ceil((waitDurationMs - elapsedMs) / 60000);
-                console.log(`⏳ Waiting 30 minutes for Archive.org processing. (${remainingMins} minutes remaining before sending to Make.com)...`);
-            } else {
-                const makeWebhook = process.env.MAKE_WEBHOOK_URL;
-                if (makeWebhook) {
-                    try {
-                        let directVideoUrl = meta.verticalVideoUrl;
-                        try {
-                            const checkRes = await axios.head(meta.verticalVideoUrl, { maxRedirects: 5 });
-                            if (checkRes.request && checkRes.request.res && checkRes.request.res.responseUrl) {
-                                directVideoUrl = checkRes.request.res.responseUrl;
-                            }
-                        } catch (headErr) {
-                            console.log("⚠️ Using standard Archive.org download URL.");
+                        const checkRes = await axios.head(meta.verticalVideoUrl, { maxRedirects: 5 });
+                        if (checkRes.request && checkRes.request.res && checkRes.request.res.responseUrl) {
+                            directVideoUrl = checkRes.request.res.responseUrl;
                         }
-
-                        console.log("🔗 30 minutes passed! Sending payload to Make.com webhook...");
-                        const hashtags = tags.map(t => t.startsWith('#') ? t : `#${t}`).join(' ');
-                        await axios.post(makeWebhook, {
-                            podcastId: podcastId,
-                            podcast_id: podcastId,
-                            Podcast_id: podcastId,
-                            title: title,
-                            description: description,
-                            hashtags: hashtags,
-                            caption: `${title}\n\n${description}\n\n${hashtags}`.trim(),
-                            video_url: directVideoUrl,
-                            videoUrl: directVideoUrl,
-                            archive_url: meta.verticalVideoUrl,
-                            audio_url: archiveAudioUrl,
-                            tags: tags,
-                            categoryName: categoryName
-                        });
-                        meta.done.instagram = true;
-                        fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
-                        console.log("✅ Make.com webhook triggered successfully!");
-                    } catch (e) {
-                        console.error("❌ Make.com webhook failed:", e.message);
+                    } catch (headErr) {
+                        console.log("⚠️ Using standard Archive.org download URL.");
                     }
+
+                    console.log("🔗 30 minutes passed! Sending payload to Make.com webhook...");
+                    const hashtags = tags.map(t => t.startsWith('#') ? t : `#${t}`).join(' ');
+                    const fullCaption = `${title}\n\n${description}\n\n${hashtags}`.trim();
+                    await axios.post(makeWebhook, {
+                        podcastId: podcastId,
+                        podcast_id: podcastId,
+                        Podcast_id: podcastId,
+                        podcast: podcastId,
+                        title: title,
+                        Title: title,
+                        episode_title: title,
+                        description: description,
+                        Description: description,
+                        episode_description: description,
+                        hashtags: hashtags,
+                        caption: fullCaption,
+                        Caption: fullCaption,
+                        text: `${title}\n\n${description}\n\n${meta.verticalVideoUrl}`,
+                        message: `${title}\n\n${description}\n\n${meta.verticalVideoUrl}`,
+                        video_url: directVideoUrl,
+                        videoUrl: directVideoUrl,
+                        archive_url: meta.verticalVideoUrl,
+                        archiveUrl: meta.verticalVideoUrl,
+                        url: meta.verticalVideoUrl,
+                        link: meta.verticalVideoUrl,
+                        audio_url: archiveAudioUrl,
+                        tags: tags,
+                        categoryName: categoryName
+                    });
+                    meta.done.instagram = true;
+                    fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
+                    console.log("✅ Make.com webhook triggered successfully!");
+                } catch (e) {
+                    console.error("❌ Make.com webhook failed:", e.message);
                 }
             }
         }
