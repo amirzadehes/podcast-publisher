@@ -31,6 +31,15 @@ async function processJob(jobDir) {
 
     const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
 
+    // بررسی زمان انتشار: اگر زمان‌دار است و هنـوز وقتش نرسیده، کلاً از این پوشه رد شو و برو سراغ بقیه پوشه‌ها!
+    if (meta.publishAt) {
+        const publishTime = new Date(meta.publishAt).getTime();
+        if (Date.now() < publishTime) {
+            console.log(`⏳ Job in ${jobDir} is scheduled for ${meta.publishAt}. Not time yet, skipping for now.`);
+            return; // فقط همین جاب متوقف می‌شود و بقیه جاب‌های صف پردازش می‌شوند
+        }
+    }
+
     const title = meta.title || "New Episode";
     const description = meta.description || "";
     const tags = meta.tags || [];
@@ -71,14 +80,6 @@ async function processJob(jobDir) {
             }
 
             if (fs.existsSync(vertVideoPath)) fs.unlinkSync(vertVideoPath);
-        }
-    }
-
-    if (meta.publishAt) {
-        const publishTime = new Date(meta.publishAt).getTime();
-        if (Date.now() < publishTime) {
-            console.log(`⏳ Job in ${jobDir} is prepared on Archive.org and scheduled for ${meta.publishAt}. Waiting for publish time...`);
-            return;
         }
     }
 
@@ -144,12 +145,14 @@ async function processJob(jobDir) {
     }
 
     if (platforms.instagram && !meta.done.instagram && meta.verticalVideoUrl) {
-        const waitDurationMs = 30 * 60 * 1000;
+        // برای پست‌های فوری که زمان انتشار ندارند، نیازی به انتظار ۳۰ دقیقه نیست اگر قبلاً آپلود شده باشند
+        // اما برای اطمینان از آماده شدن لینک آرشیو، چک می‌کنیم ۳۰ دقیقه گذشته باشد
+        const waitDurationMs = meta.publishAt ? 0 : (30 * 60 * 1000); 
         const elapsedMs = Date.now() - (meta.verticalUploadedAt || 0);
 
         if (elapsedMs < waitDurationMs) {
             const remainingMins = Math.ceil((waitDurationMs - elapsedMs) / 60000);
-            console.log(`⏳ Waiting 30 minutes from Archive.org upload time. (${remainingMins} minutes remaining before sending to Make.com)...`);
+            console.log(`⏳ Waiting for Archive propagation. (${remainingMins} minutes remaining)...`);
         } else {
             const makeWebhook = process.env.MAKE_WEBHOOK_URL;
             if (makeWebhook) {
@@ -164,7 +167,7 @@ async function processJob(jobDir) {
                         console.log("⚠️ Using standard Archive.org download URL.");
                     }
 
-                    console.log("🔗 30 minutes passed! Sending payload to Make.com webhook...");
+                    console.log("🔗 Sending payload to Make.com webhook...");
                     const hashtags = tags.map(t => t.startsWith('#') ? t : `#${t}`).join(' ');
                     const fullCaption = `${title}\n\n${description}\n\n${hashtags}`.trim();
                     await axios.post(makeWebhook, {
@@ -252,6 +255,7 @@ async function main() {
         return;
     }
 
+    // بررسی تک تک پوشه‌های صف به صورت مستقل از هم
     for (const dir of jobDirs) {
         await processJob(dir);
     }
