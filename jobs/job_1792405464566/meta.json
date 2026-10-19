@@ -1,0 +1,21 @@
+{
+  "jobId": "job_1792405464566",
+  "podcastId": "zarebin",
+  "status": "pending",
+  "title": "چرا آدامس موزی مزش قوی‌تر از خود موز هست؟",
+  "description": "تا به حال دقت کرده‌اید که چرا طعم آدامس موزی یا بستنی و شیرموز، هیچ شباهتی به موزی که از سوپرمارکت می‌خریم ندارد؟ پاسخ به این معما، در یکی از عجیب‌ترین فجایع کشاورزی قرن بیستم و انقراض طعم اصلی موز نهفته است!",
+  "tags": [],
+  "categoryName": "",
+  "publishAt": null,
+  "platforms": {
+    "youtube": false,
+    "spotify": false,
+    "instagram": true
+  },
+  "done": {
+    "youtube": false,
+    "spotify": false,
+    "instagram": false
+  },
+  "timestamp": 1792405472642
+}
