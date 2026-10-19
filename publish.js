@@ -25,20 +25,16 @@ async function uploadToArchive(itemIdentifier, localPath, remoteName, title, med
     return `https://archive.org/download/${itemIdentifier}/${remoteName}`;
 }
 
+function getFeedFileName(podcastId) {
+    if (podcastId === 'studio15') return 'feed-studio15.xml';
+    return 'feed.xml';
+}
+
 async function processJob(jobDir) {
     const metaPath = path.join(jobDir, 'meta.json');
     if (!fs.existsSync(metaPath)) return;
 
     const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
-
-    // بررسی زمان انتشار: اگر زمان‌دار است و هنـوز وقتش نرسیده، کلاً از این پوشه رد شو و برو سراغ بقیه پوشه‌ها!
-    if (meta.publishAt) {
-        const publishTime = new Date(meta.publishAt).getTime();
-        if (Date.now() < publishTime) {
-            console.log(`⏳ Job in ${jobDir} is scheduled for ${meta.publishAt}. Not time yet, skipping for now.`);
-            return; // فقط همین جاب متوقف می‌شود و بقیه جاب‌های صف پردازش می‌شوند
-        }
-    }
 
     const title = meta.title || "New Episode";
     const description = meta.description || "";
@@ -53,7 +49,7 @@ async function processJob(jobDir) {
     const verticalPath = path.join(jobDir, 'vertical.jpg');
     const squarePath = path.join(jobDir, 'square.jpg');
 
-    const itemIdentifier = meta.itemIdentifier || `podcast-${meta.timestamp || Date.now()}`;
+    const itemIdentifier = meta.itemIdentifier || `podcast-${podcastId}-${meta.timestamp || Date.now()}`;
     meta.itemIdentifier = itemIdentifier;
     const iaAccess = process.env.IA_ACCESS_KEY;
     const iaSecret = process.env.IA_SECRET_KEY;
@@ -63,7 +59,7 @@ async function processJob(jobDir) {
             console.error(`❌ vertical.jpg or audio.mp3 is missing in ${jobDir} for Instagram/TikTok!`);
         } else {
             const vertVideoPath = path.join(jobDir, 'vertical.mp4');
-            console.log(`🎬 Generating 9:16 vertical video for Archive.org (${title})...`);
+            console.log(`🎬 Generating 9:16 vertical video for Archive.org (${title} - ${podcastId})...`);
             execSync(`ffmpeg -loop 1 -framerate 2 -i "${verticalPath}" -i "${audioPath}" -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -c:v libx264 -preset veryfast -tune stillimage -crf 28 -maxrate 500k -bufsize 1000k -r 24 -g 240 -c:a aac -b:a 128k -ar 44100 -ac 2 -movflags +faststart -shortest "${vertVideoPath}" -y`);
 
             if (iaAccess && iaSecret) {
@@ -83,6 +79,14 @@ async function processJob(jobDir) {
         }
     }
 
+    if (meta.publishAt) {
+        const publishTime = new Date(meta.publishAt).getTime();
+        if (Date.now() < publishTime) {
+            console.log(`⏳ Job in ${jobDir} (${podcastId}) is prepared on Archive.org and scheduled for ${meta.publishAt}. Waiting for publish time...`);
+            return;
+        }
+    }
+
     const needsAudioFile =
         (platforms.youtube && !meta.done.youtube) ||
         (platforms.spotify && !meta.done.spotify);
@@ -96,23 +100,27 @@ async function processJob(jobDir) {
             console.error(`❌ horizontal.jpg is missing in ${jobDir} for YouTube!`);
         } else {
             const ytVideoPath = path.join(jobDir, 'youtube.mp4');
-            console.log(`🎬 Generating 16:9 horizontal video for YouTube (${title})...`);
+            console.log(`🎬 Generating 16:9 horizontal video for YouTube (${title} - ${podcastId})...`);
             execSync(`ffmpeg -loop 1 -i "${horizontalPath}" -i "${audioPath}" -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,format=yuv420p" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -shortest "${ytVideoPath}" -y`);
 
             const ytClientId = process.env.YT_CLIENT_ID;
             const ytClientSecret = process.env.YT_CLIENT_SECRET;
-            const ytRefreshToken = process.env.YT_REFRESH_TOKEN;
+            const ytRefreshToken = (podcastId === 'studio15')
+                ? process.env.YT_REFRESH_TOKEN_STUDIO15
+                : process.env.YT_REFRESH_TOKEN;
 
             if (ytClientId && ytClientSecret && ytRefreshToken) {
                 try {
-                    console.log("📺 Uploading horizontal video to YouTube...");
+                    console.log(`📺 Uploading horizontal video to YouTube channel (${podcastId})...`);
                     await uploadToYouTube(ytClientId, ytClientSecret, ytRefreshToken, ytVideoPath, title, description, tags, categoryName);
                     meta.done.youtube = true;
                     fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
-                    console.log("✅ Published to YouTube successfully!");
+                    console.log(`✅ Published to YouTube (${podcastId}) successfully!`);
                 } catch (e) {
-                    console.error("❌ YouTube publishing failed:", e.message);
+                    console.error(`❌ YouTube publishing failed (${podcastId}):`, e.message);
                 }
+            } else {
+                console.error(`❌ Missing YouTube credentials/refresh token for ${podcastId}!`);
             }
             if (fs.existsSync(ytVideoPath)) fs.unlinkSync(ytVideoPath);
         }
@@ -124,20 +132,21 @@ async function processJob(jobDir) {
     if (platforms.spotify && !meta.done.spotify) {
         if (iaAccess && iaSecret) {
             try {
-                console.log("🏛️ Uploading MP3 to Archive.org for Spotify...");
+                console.log(`🏛️ Uploading MP3 to Archive.org for Spotify (${podcastId})...`);
                 archiveAudioUrl = await uploadToArchive(itemIdentifier, audioPath, 'audio.mp3', title, 'audio', 'opensource_audio', iaAccess, iaSecret);
                 meta.archiveAudioUrl = archiveAudioUrl;
 
                 if (fs.existsSync(squarePath)) {
-                    console.log("🏛️ Uploading 1:1 square cover to Archive.org for Spotify...");
+                    console.log(`🏛️ Uploading 1:1 square cover to Archive.org for Spotify (${podcastId})...`);
                     archiveSquareUrl = await uploadToArchive(itemIdentifier, squarePath, 'square.jpg', title, 'audio', 'opensource_audio', iaAccess, iaSecret);
                     meta.archiveSquareUrl = archiveSquareUrl;
                 }
 
-                updateSpotifyFeed(title, description, archiveAudioUrl, archiveSquareUrl, fs.statSync(audioPath).size);
+                const feedFile = getFeedFileName(podcastId);
+                updateSpotifyFeed(feedFile, title, description, archiveAudioUrl, archiveSquareUrl, fs.statSync(audioPath).size);
                 meta.done.spotify = true;
                 fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
-                console.log("✅ feed.xml updated successfully for Spotify!");
+                console.log(`✅ ${feedFile} updated successfully for Spotify!`);
             } catch (e) {
                 console.error("❌ Spotify upload failed:", e.response ? e.response.data : e.message);
             }
@@ -145,14 +154,12 @@ async function processJob(jobDir) {
     }
 
     if (platforms.instagram && !meta.done.instagram && meta.verticalVideoUrl) {
-        // برای پست‌های فوری که زمان انتشار ندارند، نیازی به انتظار ۳۰ دقیقه نیست اگر قبلاً آپلود شده باشند
-        // اما برای اطمینان از آماده شدن لینک آرشیو، چک می‌کنیم ۳۰ دقیقه گذشته باشد
-        const waitDurationMs = meta.publishAt ? 0 : (30 * 60 * 1000); 
+        const waitDurationMs = 30 * 60 * 1000;
         const elapsedMs = Date.now() - (meta.verticalUploadedAt || 0);
 
         if (elapsedMs < waitDurationMs) {
             const remainingMins = Math.ceil((waitDurationMs - elapsedMs) / 60000);
-            console.log(`⏳ Waiting for Archive propagation. (${remainingMins} minutes remaining)...`);
+            console.log(`⏳ Waiting 30 minutes from Archive.org upload time for ${podcastId}. (${remainingMins} minutes remaining before sending to Make.com)...`);
         } else {
             const makeWebhook = process.env.MAKE_WEBHOOK_URL;
             if (makeWebhook) {
@@ -167,7 +174,7 @@ async function processJob(jobDir) {
                         console.log("⚠️ Using standard Archive.org download URL.");
                     }
 
-                    console.log("🔗 Sending payload to Make.com webhook...");
+                    console.log(`🔗 30 minutes passed! Sending payload to Make.com webhook (${podcastId})...`);
                     const hashtags = tags.map(t => t.startsWith('#') ? t : `#${t}`).join(' ');
                     const fullCaption = `${title}\n\n${description}\n\n${hashtags}`.trim();
                     await axios.post(makeWebhook, {
@@ -198,7 +205,7 @@ async function processJob(jobDir) {
                     });
                     meta.done.instagram = true;
                     fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
-                    console.log("✅ Make.com webhook triggered successfully!");
+                    console.log(`✅ Make.com webhook triggered successfully for ${podcastId}!`);
                 } catch (e) {
                     console.error("❌ Make.com webhook failed:", e.message);
                 }
@@ -255,7 +262,6 @@ async function main() {
         return;
     }
 
-    // بررسی تک تک پوشه‌های صف به صورت مستقل از هم
     for (const dir of jobDirs) {
         await processJob(dir);
     }
@@ -263,10 +269,23 @@ async function main() {
     console.log("🎉 All due publishing tasks completed!");
 }
 
-function updateSpotifyFeed(title, description, audioUrl, imageUrl, audioSize) {
-    if (!fs.existsSync('feed.xml')) return;
+function updateSpotifyFeed(feedFileName, title, description, audioUrl, imageUrl, audioSize) {
+    if (!fs.existsSync(feedFileName)) {
+        const defaultChannelTitle = feedFileName === 'feed-studio15.xml' ? 'Studio 15' : 'Zarebin';
+        const defaultLang = feedFileName === 'feed-studio15.xml' ? 'de' : 'fa';
+        const initialXml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>${defaultChannelTitle}</title>
+    <link>https://amirzadehes.github.io/podcast-publisher/</link>
+    <language>${defaultLang}</language>
+    <description>${defaultChannelTitle} Podcast</description>
+  </channel>
+</rss>`;
+        fs.writeFileSync(feedFileName, initialXml, 'utf8');
+    }
 
-    let feed = fs.readFileSync('feed.xml', 'utf8');
+    let feed = fs.readFileSync(feedFileName, 'utf8');
     const pubDate = new Date().toUTCString();
     const guid = `ep-${Date.now()}`;
     const imageTag = imageUrl ? `\n      <itunes:image href="${imageUrl}"/>` : '';
@@ -286,7 +305,7 @@ function updateSpotifyFeed(title, description, audioUrl, imageUrl, audioSize) {
         feed = feed.replace('</channel>', `${newItem}\n  </channel>`);
     }
 
-    fs.writeFileSync('feed.xml', feed, 'utf8');
+    fs.writeFileSync(feedFileName, feed, 'utf8');
 }
 
 async function uploadToYouTube(clientId, clientSecret, refreshToken, videoPath, title, description, tags, categoryName) {
