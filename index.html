@@ -9,8 +9,8 @@
         .container { max-width: 650px; background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin: 0 auto 25px auto; border: 1px solid #333; }
         h2, h3 { text-align: center; color: #ffffff; margin-top: 0; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #b0b0b0; }
-        input[type="text"], input[type="password"], input[type="datetime-local"], textarea { width: 100%; padding: 10px; margin-top: 5px; background: #2d2d2d; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; font-family: Tahoma, sans-serif; }
-        input:focus, textarea:focus { border-color: #0d6efd; outline: none; }
+        input[type="text"], input[type="password"], input[type="datetime-local"], textarea, select { width: 100%; padding: 10px; margin-top: 5px; background: #2d2d2d; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; font-family: Tahoma, sans-serif; font-size: 14px; }
+        input:focus, textarea:focus, select:focus { border-color: #0d6efd; outline: none; }
         input[type="file"] { width: 100%; padding: 8px; margin-top: 5px; background: #252525; border: 1px solid #444; color: #bbb; border-radius: 6px; cursor: pointer; box-sizing: border-box; }
         .platforms { background: #252525; padding: 15px; border-radius: 6px; margin-top: 10px; border: 1px solid #383838; display: flex; flex-direction: column; gap: 12px; }
         .platforms label { margin-top: 0; font-weight: normal; color: #e0e0e0; cursor: pointer; display: flex; align-items: center; }
@@ -18,7 +18,7 @@
         button { width: 100%; background: #0d6efd; color: white; border: none; padding: 14px; margin-top: 25px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; font-family: Tahoma, sans-serif; }
         button:hover { background: #0b5ed7; }
         button:disabled { background: #444; color: #888; cursor: not-allowed; }
-        .btn-secondary { background: #198754; margin-top: 10px; }
+        .btn-secondary { background: #198754; margin-top: 15px; }
         .btn-secondary:hover { background: #157347; }
         #status, #editStatus { margin-top: 15px; text-align: center; font-weight: bold; line-height: 1.6; }
         .ep-item { background: #262626; border: 1px solid #444; padding: 15px; border-radius: 8px; margin-top: 15px; }
@@ -43,6 +43,12 @@
     <label>توکن گیت‌هاب (فقط یک بار وارد کنید):</label>
     <input type="password" id="ghToken" placeholder="ghp_...">
 
+    <label>انتخاب پادکست:</label>
+    <select id="podcastSelect">
+        <option value="zarebin">Zarebin (ذره‌بین)</option>
+        <option value="studio15">Studio 15</option>
+    </select>
+
     <label>عنوان اپیزود:</label>
     <input type="text" id="title" placeholder="عنوان اپیزود را وارد کنید">
 
@@ -52,8 +58,8 @@
     <label>تگ‌ها</label>
     <input type="text" id="tags" placeholder="تگ_اول تگ_دوم تگ_سوم">
 
-    <label>پلی‌لیست</label>
-    <input type="text" id="categoryName" placeholder="مثلاً: Studio 15 یا Katalog یا ذره‌بین">
+    <label>پلی‌لیست (یوتیوب)</label>
+    <input type="text" id="categoryName" placeholder="نام پلی‌لیست در کانال یوتیوب">
 
     <label>زمان انتشار</label>
     <input type="datetime-local" id="publishAt">
@@ -83,6 +89,13 @@
 
 <div class="container">
     <h3>مدیریت و ویرایش اپیزودهای اسپاتیفای</h3>
+
+    <label>انتخاب پادکست برای ویرایش فید:</label>
+    <select id="editPodcastSelect" onchange="clearLoadedEpisodes()">
+        <option value="zarebin">Zarebin (feed.xml)</option>
+        <option value="studio15">Studio 15 (feed-studio15.xml)</option>
+    </select>
+
     <button class="btn-secondary" onclick="loadEpisodesForEdit()">نمایش لیست اپیزودها برای ویرایش / حذف</button>
     
     <div id="searchContainer" class="search-box">
@@ -106,6 +119,18 @@
 
     document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
 
+    function getSelectedFeedFile() {
+        const pod = document.getElementById('editPodcastSelect').value;
+        return pod === 'studio15' ? 'feed-studio15.xml' : 'feed.xml';
+    }
+
+    function clearLoadedEpisodes() {
+        document.getElementById('episodesList').innerHTML = '';
+        document.getElementById('editStatus').innerText = '';
+        document.getElementById('searchContainer').style.display = 'none';
+        document.getElementById('paginationContainer').style.display = 'none';
+    }
+
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -120,6 +145,7 @@
 
     async function publishEpisode() {
         const token = document.getElementById('ghToken').value.trim();
+        const podcastId = document.getElementById('podcastSelect').value;
         const title = document.getElementById('title').value.trim();
         const description = document.getElementById('description').value.trim();
         const tagsInput = document.getElementById('tags').value.trim();
@@ -164,7 +190,7 @@
 
         localStorage.setItem('gh_token', token);
         statusDiv.style.color = '#76d7c4';
-        statusDiv.innerText = 'در حال ارسال فایل‌ها به سرور ابری... لطفاً صبر کنید.';
+        statusDiv.innerText = `در حال ارسال فایل‌های پادکست (${podcastId}) به سرور ابری... لطفاً صبر کنید.`;
 
         const jobId = `job_${Date.now()}`;
         const jobFolder = `jobs/${jobId}`;
@@ -191,7 +217,7 @@
             const tagsArray = tagsInput ? tagsInput.split(/\s+/).filter(Boolean) : [];
             const metaData = {
                 jobId: jobId,
-                podcastId: "zarebin",
+                podcastId: podcastId,
                 status: "pending",
                 title: title,
                 description: description,
@@ -217,13 +243,12 @@
             await triggerWorkflow(token);
 
             statusDiv.style.color = '#2ecc71';
-            statusDiv.innerText = '✅ تمام فایل‌ها در صف اختصاصی قرار گرفت! سرور ابری در حال پردازش است.';
-                } catch (error) {
+            statusDiv.innerText = `✅ تمام فایل‌ها برای پادکست «${podcastId}» در صف قرار گرفت! سرور ابری در حال پردازش است.`;
+        } catch (error) {
             statusDiv.style.color = '#e74c3c';
             statusDiv.innerText = '❌ خطا: ' + (error.message || JSON.stringify(error));
             console.error(error);
         }
-
     }
 
     async function sendToGitHub(token, base64Content, path) {
@@ -305,6 +330,7 @@
 
     async function loadEpisodesForEdit() {
         const token = document.getElementById('ghToken').value.trim();
+        const feedFile = getSelectedFeedFile();
         const editStatus = document.getElementById('editStatus');
         const listDiv = document.getElementById('episodesList');
         const searchContainer = document.getElementById('searchContainer');
@@ -316,13 +342,13 @@
         }
 
         editStatus.style.color = '#76d7c4';
-        editStatus.innerText = 'در حال دریافت لیست اپیزودها...';
+        editStatus.innerText = `در حال دریافت لیست اپیزودها از ${feedFile}...`;
         listDiv.innerHTML = '';
         searchContainer.style.display = 'none';
         paginationContainer.style.display = 'none';
 
         try {
-            const url = `https://api.github.com/repos/${owner}/${repo}/contents/feed.xml`;
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${feedFile}`;
             const res = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -330,14 +356,14 @@
                 }
             });
 
-            if (!res.ok) throw new Error('فایل feed.xml یافت نشد.');
+            if (!res.ok) throw new Error(`فایل ${feedFile} هنوز ساخته نشده یا یافت نشد.`);
             const data = await res.json();
             currentFeedXml = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
 
             allEpisodes = parseEpisodesFromXml(currentFeedXml);
 
             if (allEpisodes.length === 0) {
-                editStatus.innerText = 'هیچ اپیزودی در فید یافت نشد.';
+                editStatus.innerText = 'هیچ اپیزودی در این فید یافت نشد.';
                 return;
             }
 
@@ -430,12 +456,13 @@
 
     async function saveEpisodeEdit(index) {
         const token = document.getElementById('ghToken').value.trim();
+        const feedFile = getSelectedFeedFile();
         const newTitle = document.getElementById(`edit_title_${index}`).value.trim();
         const newDesc = document.getElementById(`edit_desc_${index}`).value.trim();
         const editStatus = document.getElementById('editStatus');
 
         editStatus.style.color = '#ffc107';
-        editStatus.innerText = 'در حال ذخیره تغییرات در فید اسپاتیفای...';
+        editStatus.innerText = `در حال ذخیره تغییرات در ${feedFile}...`;
 
         try {
             let itemCounter = -1;
@@ -449,7 +476,7 @@
             });
 
             const b64Xml = btoa(unescape(encodeURIComponent(updatedXml)));
-            await sendToGitHub(token, b64Xml, 'feed.xml');
+            await sendToGitHub(token, b64Xml, feedFile);
             currentFeedXml = updatedXml;
 
             const epInAll = allEpisodes.find(e => e.originalIndex === index);
@@ -459,7 +486,7 @@
             }
 
             editStatus.style.color = '#2ecc71';
-            editStatus.innerText = '✅ تغییرات با موفقیت در فید ذخیره شد و به زودی در اسپاتیفای به‌روزرسانی می‌شود!';
+            editStatus.innerText = `✅ تغییرات با موفقیت در ${feedFile} ذخیره شد!`;
         } catch (err) {
             editStatus.style.color = '#e74c3c';
             editStatus.innerText = '❌ خطا در ذخیره تغییرات: ' + err.message;
@@ -469,8 +496,9 @@
     async function deleteEpisode(index) {
         const ep = allEpisodes.find(e => e.originalIndex === index);
         const epTitle = ep ? ep.title : `شماره ${index + 1}`;
+        const feedFile = getSelectedFeedFile();
 
-        if (!confirm(`آیا از حذف کامل اپیزود «${epTitle}» از فید اسپاتیفای مطمئن هستید؟`)) {
+        if (!confirm(`آیا از حذف کامل اپیزود «${epTitle}» از ${feedFile} مطمئن هستید؟`)) {
             return;
         }
 
@@ -478,7 +506,7 @@
         const editStatus = document.getElementById('editStatus');
 
         editStatus.style.color = '#ffc107';
-        editStatus.innerText = 'در حال حذف اپیزود از فید اسپاتیفای...';
+        editStatus.innerText = `در حال حذف اپیزود از ${feedFile}...`;
 
         try {
             let itemCounter = -1;
@@ -489,14 +517,14 @@
             });
 
             const b64Xml = btoa(unescape(encodeURIComponent(updatedXml)));
-            await sendToGitHub(token, b64Xml, 'feed.xml');
+            await sendToGitHub(token, b64Xml, feedFile);
             currentFeedXml = updatedXml;
 
             allEpisodes = parseEpisodesFromXml(currentFeedXml);
             handleSearch();
 
             editStatus.style.color = '#2ecc71';
-            editStatus.innerText = `✅ اپیزود «${epTitle}» با موفقیت از فید اسپاتیفای حذف شد!`;
+            editStatus.innerText = `✅ اپیزود «${epTitle}» با موفقیت از ${feedFile} حذف شد!`;
         } catch (err) {
             editStatus.style.color = '#e74c3c';
             editStatus.innerText = '❌ خطا در حذف اپیزود: ' + err.message;
