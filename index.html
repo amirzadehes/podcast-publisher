@@ -218,10 +218,12 @@
 
             statusDiv.style.color = '#2ecc71';
             statusDiv.innerText = '✅ تمام فایل‌ها در صف اختصاصی قرار گرفت! سرور ابری در حال پردازش است.';
-        } catch (error) {
+                } catch (error) {
             statusDiv.style.color = '#e74c3c';
-            statusDiv.innerText = '❌ خطا: ' + error.message;
+            statusDiv.innerText = '❌ خطا: ' + (error.message || JSON.stringify(error));
+            console.error(error);
         }
+
     }
 
     async function sendToGitHub(token, base64Content, path) {
