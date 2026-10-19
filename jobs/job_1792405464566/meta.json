@@ -17,5 +17,8 @@
     "spotify": false,
     "instagram": false
   },
-  "timestamp": 1792405472642
+  "timestamp": 1792405472642,
+  "itemIdentifier": "podcast-1792405472642",
+  "verticalVideoUrl": "https://archive.org/download/podcast-1792405472642/vertical.mp4",
+  "verticalUploadedAt": 1792405607670
 }
