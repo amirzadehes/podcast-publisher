@@ -1,0 +1,23 @@
+{
+  "jobId": "job_1792704294410",
+  "podcastId": "studio15",
+  "status": "pending",
+  "title": "تست",
+  "description": "تست توضیح",
+  "tags": [
+    "تگ"
+  ],
+  "categoryName": "بلی",
+  "publishAt": null,
+  "platforms": {
+    "youtube": true,
+    "spotify": false,
+    "instagram": true
+  },
+  "done": {
+    "youtube": false,
+    "spotify": false,
+    "instagram": false
+  },
+  "timestamp": 1792704302225
+}
