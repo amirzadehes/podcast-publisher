@@ -15,9 +15,12 @@
     "instagram": true
   },
   "done": {
-    "youtube": false,
+    "youtube": true,
     "spotify": false,
     "instagram": false
   },
-  "timestamp": 1792704302225
+  "timestamp": 1792704302225,
+  "itemIdentifier": "podcast-studio15-1792704302225",
+  "verticalVideoUrl": "https://archive.org/download/podcast-studio15-1792704302225/vertical.mp4",
+  "verticalUploadedAt": 1792704376867
 }
