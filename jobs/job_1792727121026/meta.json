@@ -1,0 +1,21 @@
+{
+  "jobId": "job_1792727121026",
+  "podcastId": "studio15",
+  "status": "pending",
+  "title": "عنوان",
+  "description": "توثر",
+  "tags": [],
+  "categoryName": "",
+  "publishAt": null,
+  "platforms": {
+    "youtube": true,
+    "spotify": false,
+    "instagram": true
+  },
+  "done": {
+    "youtube": false,
+    "spotify": false,
+    "instagram": false
+  },
+  "timestamp": 1792727128990
+}
