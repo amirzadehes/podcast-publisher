@@ -33,11 +33,13 @@
   },
   "done": {
     "youtube": false,
-    "spotify": false,
-    "instagram": false
+    "spotify": true,
+    "instagram": true
   },
   "timestamp": 1792735440309,
   "itemIdentifier": "podcast-zarebin-1792735440309",
   "verticalVideoUrl": "https://archive.org/download/podcast-zarebin-1792735440309/vertical.mp4",
-  "verticalUploadedAt": 1792735571031
+  "verticalUploadedAt": 1792735571031,
+  "archiveAudioUrl": "https://archive.org/download/podcast-zarebin-1792735440309/audio.mp3",
+  "archiveSquareUrl": "https://archive.org/download/podcast-zarebin-1792735440309/square.jpg"
 }
