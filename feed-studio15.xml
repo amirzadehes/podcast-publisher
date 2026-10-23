@@ -16,5 +16,14 @@
       <itunes:category text="Language Learning"/>
     </itunes:category>
     <itunes:explicit>false</itunes:explicit>
+  
+    <item>
+      <title><![CDATA[الان . . . یا الان؟ فرق jetzt، gerade و nun در آلمانی!]]></title>
+      <description><![CDATA[توی فارسی برای هر موقعیتی خیلی راحت می‌گیم «الان». الان راه می‌افتم، الان غذا می‌خورم، الان دستم بنده! اما توی آلمانی اگه این کلمه‌ها رو جابه‌جا بگی، طرف پشت تلفن یا سر کار یه برداشت کاملاً متفاوت از حرفت می‌کنه. توی این اپیزود ۳ دقیقه‌ای از Studio 15، تفاوت کاربردی jetzt، gerade، nun، im Moment و حتی کلمه رسمی nunmehr رو با مثال‌های ملموس روزمره بررسی می‌کنیم، به همراه یک فکت تاریخی و عجیب از سیستم حمل‌ونقل آلمان!]]></description>
+      <enclosure url="https://archive.org/download/podcast-studio15-1792739934373/audio.mp3" length="3828332" type="audio/mpeg"/>
+      <guid isPermaLink="false">ep-1792740013520</guid>
+      <pubDate>Fri, 23 Oct 2026 07:20:13 GMT</pubDate>
+      <itunes:image href="https://archive.org/download/podcast-studio15-1792739934373/square.jpg"/>
+    </item>
   </channel>
 </rss>
