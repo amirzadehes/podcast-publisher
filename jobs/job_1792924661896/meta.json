@@ -1,0 +1,21 @@
+{
+  "jobId": "job_1792924661896",
+  "podcastId": "zarebin",
+  "status": "pending",
+  "title": "تیت",
+  "description": "توصبح",
+  "tags": [],
+  "categoryName": "",
+  "publishAt": null,
+  "platforms": {
+    "youtube": true,
+    "spotify": false,
+    "instagram": false
+  },
+  "done": {
+    "youtube": false,
+    "spotify": false,
+    "instagram": false
+  },
+  "timestamp": 1792924667072
+}
